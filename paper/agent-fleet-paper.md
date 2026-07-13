@@ -163,7 +163,7 @@ Each producer-tier agent integrates mandatory runtime quality gates: `de-ai-fier
 
 ### 2.7 Data Sources and Reproducibility
 
-The complete agent fleet source code, agent definitions (46 `.md` + 46 `.meta.yaml` files), skill workflows (33 SKILL.md files), instruction files (51 `.instructions.md`), validation scripts (37 scripts), and experiment configurations are available in the open-source repository at https://github.com/[username]/fusion-agent-fleet. The system snapshot used for all experiments reported in this paper corresponds to commit `cbbf982` (2026-07-13). The per-agent model routing used in experiments follows the functional classification in Table 1, with the fallback proxy chain described in §2.1.
+The complete agent fleet source code, agent definitions (46 `.md` + 46 `.meta.yaml` files), skill workflows (33 SKILL.md files), instruction files (51 `.instructions.md`), validation scripts (37 scripts), and experiment configurations are available in the open-source repository at https://github.com/zxkjack123/fusion-agent-fleet. The system snapshot used for all experiments reported in this paper corresponds to commit `cbbf982` (2026-07-13). The per-agent model routing used in experiments follows the functional classification in Table 1, with the fallback proxy chain described in §2.1.
 
 Figure data and scenario execution logs are archived in the repository under `outputs/` and `traces/` directories. The `_project-snapshot.md` file in the repository documents the exact agent count (46), MCP server count (42), model distribution, and script/infrastructure configuration at the time of experiments. Validation results (13 portfolio checks, 20 unit tests) are reproducible via `bash scripts/validate-portfolio.sh`. All scenario-specific instructions, input parameters, and output data are preserved with their exact git commit context for full reproducibility.
 
@@ -331,7 +331,7 @@ The system currently manages 14 active reference projects, validating its cross-
 
 ## Data Availability Statement
 
-The agent fleet source code, agent definition files (46 `.md` + 46 `.meta.yaml`), skill workflows (33 SKILL.md files), instruction files, validation scripts, experiment configuration, and scenario execution logs that support the findings of this study are openly available in the repository at https://github.com/[username]/fusion-agent-fleet. The specific commit used for all experiments is `cbbf982` (2026-07-13). HPC cluster configurations, model provider API keys, and internal project data are maintained in a private infrastructure repository and are not required for validating the architecture described in this paper.
+The agent fleet source code, agent definition files (46 `.md` + 46 `.meta.yaml`), skill workflows (33 SKILL.md files), instruction files, validation scripts, experiment configuration, and scenario execution logs that support the findings of this study are openly available in the repository at https://github.com/zxkjack123/fusion-agent-fleet. The specific commit used for all experiments is `cbbf982` (2026-07-13). HPC cluster configurations, model provider API keys, and internal project data are maintained in a private infrastructure repository and are not required for validating the architecture described in this paper.
 
 ## References
 
