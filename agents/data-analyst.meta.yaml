@@ -1,0 +1,74 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `data_paths` (list[path], required): 待处理数据文件路径（csv / xlsx / json / hdf5 / parquet / 文本日志）
+  - `target_metrics` (list[str], required): 需要计算或拟合的物理/统计量
+  - `analysis_type` (enum, required): `fit` | `uncertainty_propagation` | `CE_ratio` | `parameter_sweep` | `cleaning` | `multi`
+  - `preferred_outputs` (list[str], optional, default `["cleaned_csv", "fit_summary_json", "figure_png"]`)
+  - `uncertainty_model` (dict, optional): 误差/不确定度来源描述（数据列名、协方差结构、置信水平）
+  - `fit_template` (dict, optional): 函数族、初值、参数边界，用于 `analysis_type=fit`
+  - `comparison_baseline` (path 或 dict, optional): 用于 C/E ratio 的实验/参考数据集
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 Stage F (Delivery Package) 输出交付清单，必须包含 `**Status**` 字段（`COMPLETED` / `PARTIAL` / `BLOCKED`）、关键指标表（含不确定度）、图清单与路径、Stage E Pre-Delivery Audit 表格、以及 reproducibility 注脚（脚本/数据指纹/随机种子）。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Explore (OpenCode built-in)
+  **When to delegate**: Quick read-only codebase search, file discovery, or dependency tracing.
+  **Required prompt fields**: N/A — Explore is a built-in subagent with no project-local agent contract file.
+  Expected return shape: File paths, search results, or code snippets relevant to the query.
+  
+  ### Critical Thinking
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/critical-thinking.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/critical-thinking.md` → `### Final Report 强制格式`.
+  
+  ### Diagram Architect
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/diagram-architect.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/diagram-architect.md` → `### Final Report 强制格式`.
+  
+  ### Figure Analyst
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/figure-analyst.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/figure-analyst.md` → `### Final Report 强制格式`.
+  
+  ### Academic Writer
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/academic-writer.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/academic-writer.md` → `### Final Report 强制格式`.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 Stage F (Delivery Package) 输出交付清单，必须包含 `**Status**` 字段（`COMPLETED` / `PARTIAL` / `BLOCKED`）、关键指标表（含不确定度）、图清单与路径、Stage E Pre-Delivery Audit 表格、以及 reproducibility 注脚（脚本/数据指纹/随机种子）。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: critical-thinking, name: Critical Thinking}
+  - {id: diagram-architect, name: Diagram Architect}
+  - {id: figure-analyst, name: Figure Analyst}
+handoffs:
+  - {id: academic-writer, label: Write up analysis results, name: Academic Writer, prompt: 'Incorporate the data analysis figures, tables, and key findings from this session into the manuscript.'}
+delivery_tier: specialist
+revision: 8
+argument_hint: Provide data file paths, target metrics, and desired analysis outputs (e.g., fitting, C/E, uncertainty)

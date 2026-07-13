@@ -1,0 +1,116 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `research_topic` (str, required): 研究主题/问题描述
+  - `scope_bounds` (dict, required): 范围约束，含 `domain` / `year_from` / `year_to` / `depth` (overview/standard/deep)
+  - `required_deliverables` (list[str], required): 交付物清单（如 `report`, `citations`, `evidence_table`, `comparison_matrix`）
+  - `output_language` (enum, required): `zh` | `en` | `bilingual`
+  - `max_rounds` (int, optional, default 3): 多轮反思最大轮次
+  - `citation_budget` (int, optional): 引用条目预算上限
+  - `paywall_policy` (enum, optional, default `open_only`): `open_only` | `prefer_open` | `any`
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  输出必须以 `**Status**` 行开头（`COMPLETED` / `PARTIAL` / `BLOCKED`），随后包含：(1) 执行摘要 + 关键发现表；(2) 证据/引用清单（每条含来源、年份、可信度评分）；(3) 反思迭代记录（每轮的 challenge + revision）；(4) Pre-Delivery Audit 表（按 instructions/pre-delivery-audit.instructions.md 的 L2-Standard）；(5) 未解决问题与建议下一步。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  *散文中已有的委派流程描述仅作参考；本段为字段权威定义。*
+  
+  When delegating to sub-agents via `opencode task`, construct prompts using the templates below. Common fields (applicable to all targets):
+  - `context_bundle`: 关键事实摘要（先前 stage 产出）
+  - `scope`: 任务范围界定
+  - `expected_deliverable`: 期望产出物描述
+  - `quality_gate`: 质量门禁要求
+  - `confirm`: 是否需要用户确认
+  
+  ### Plan Architect
+  **When to delegate**: 任务执行前需制定执行计划
+  **Required prompt fields**:
+  - `requirements_summary`: 任务要求摘要
+  - `affected_files_hint`: 可能涉及的代码/文件
+  - `scope_mode: HOLD | EXPANSION | REDUCTION`
+  - `context_bundle`, `scope`, `expected_deliverable`, `quality_gate`, `confirm`
+  
+  ### Task Executor
+  **When to delegate**: 执行计划已就绪，需自动执行
+  **Required prompt fields**:
+  - `plan_path`: 执行计划文件路径
+  - `resume_from_task_id` (optional): 从中断位置恢复的任务 ID
+  - `context_bundle`, `scope`, `expected_deliverable`, `confirm`
+  
+  ### Simulation Builder
+  **When to delegate**: 需要构建仿真输入或提交 HPC 作业
+  **Required prompt fields**:
+  - 参照 `instructions/scnet-hpc-coordinator.instructions.md` Information Flow Contract
+  - `scope`: 建模目标（几何 / 材料 / 源项 / tally）
+  - `confirm`（推荐 true）
+  
+  ### Simulation Analyst
+  **When to delegate**: 仿真输出后处理 / 数据提取 / 绘图
+  **Required prompt fields**:
+  - 参照 `instructions/scnet-hpc-coordinator.instructions.md` Information Flow Contract
+  - `scope`: 分析目标（tally 提取 / 活化计算 / 剂量率 / 拟合）
+  
+  ### Innovation Reviewer
+  **When to delegate**: 发现潜在创新点或方法新颖性评估
+  **Required prompt fields** (see `.opencode/agent/innovation-reviewer.md` → `### 调用方需提供`):
+  - `document_path`, `document_type`, `target_venue`, `domain`, `review_depth`
+  - `context_bundle`, `scope`, `expected_deliverable`, `quality_gate`
+  
+  ### Academic Writer
+  **When to delegate**: 需生成或修改论文/报告草稿
+  **Required prompt fields**:
+  - `mode: A | B | C`
+  - `target_venue` (optional)
+  - `manuscript_path`: 稿件路径
+  - `context_bundle`, `scope`, `expected_deliverable`, `quality_gate`
+  
+  ### Patent Writer
+  **When to delegate**: 需生成专利交底书或专利申请文件
+  **Required prompt fields**:
+  - `technical_disclosure_path`: 技术交底材料路径
+  - `inventor_list`: 发明人列表
+  - `priority_jurisdictions`: 优先权注册地
+  - `context_bundle`, `scope`, `expected_deliverable`, `quality_gate`, `confirm`
+  
+  ### Repo Reviewer
+  **When to delegate**: 代码仓库审查 / 差异评审
+  **Required prompt fields**:
+  - `repo_path`: 仓库路径
+  - `review_scope: full | diff`
+  - `context_bundle`, `scope`, `expected_deliverable`, `quality_gate`
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  输出必须以 `**Status**` 行开头（`COMPLETED` / `PARTIAL` / `BLOCKED`），随后包含：(1) 执行摘要 + 关键发现表；(2) 证据/引用清单（每条含来源、年份、可信度评分）；(3) 反思迭代记录（每轮的 challenge + revision）；(4) Pre-Delivery Audit 表（按 instructions/pre-delivery-audit.instructions.md 的 L2-Standard）；(5) 未解决问题与建议下一步。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: critical-thinking, name: Critical Thinking}
+  - {id: innovation-reviewer, name: Innovation Reviewer}
+  - {id: academic-writer, name: Academic Writer}
+  - {id: patent-writer, name: Patent Writer}
+  - {id: plan-architect, name: Plan Architect}
+  - {id: paper-reviewer, name: Paper Reviewer}
+  - {id: simulation-analyst, name: Simulation Analyst}
+  - {id: simulation-builder, name: Simulation Builder}
+  - {id: data-analyst, name: Data Analyst}
+  - {id: pm-coordinator, name: PM Coordinator}
+  - {id: scientific-paper-research, name: Scientific Paper Research}
+  - {id: scnet-hpc-coordinator, name: Scnet HPC Coordinator}
+  - {id: task-executor, name: Task Executor}
+delivery_tier: orchestrator
+revision: 21

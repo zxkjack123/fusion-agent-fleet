@@ -1,0 +1,78 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `chain_spec_path` (path, required): chain.yaml 链定义文件路径
+  - `operation` (enum, required): `run` | `resume` | `parse_only` | `dry_run`
+  - `workdir` (path, required): chain 工作目录
+  - `cluster_hint` (str, optional): 偏好集群（如 `sugon` / `scnet`），交给 Scnet HPC Coordinator
+  - `resume_checkpoint` (path, optional): 断点续跑的 checkpoint 路径
+  - `force_rerun_stages` (list[str], optional): 强制重跑的阶段名
+  - `dry_run_only` (bool, optional, default `false`)
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Output expectations` 章节输出，首行必须为 `**Status**`（`COMPLETED` / `PARTIAL` / `BLOCKED`），包含各 stage 的 task_id 与状态、产物路径、失败 stage 的 stderr 摘要与下一步建议。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  *散文中已有的委派流程描述仅作参考；本段为字段权威定义。*
+  
+  When delegating to sub-agents via `opencode task`, construct prompts using the templates below.
+  
+  > **Priority 0 — suggested_executor routing**: When the chain spec or caller
+  > provides a `suggested_executor` field, skip the default delegation logic
+  > and route directly to the specified agent. This ensures upstream agents
+  > (e.g., Plan Architect, Task Executor) can override FCR's default delegation
+  > with their own routing decisions.
+  
+  ### Scnet HPC Coordinator
+  **When to delegate**: 任意 HPC 作业生命周期操作（submit / cancel / download / 集群选择 / SIF 镜像 / software registry）。
+  **Required prompt fields** (see `.opencode/agent/scnet-hpc-coordinator.md` → `### 调用方需提供`):
+  - `operation` (enum, required): `submit` | `cancel` | `download` | `choose_best` | `task_status` | `software_resolve`
+  - `task_id` (str, optional, required for cancel/download/task_status)
+  - `command` (list[str], optional, required for submit)
+  - `estimated_wall_time_minutes` (int, optional)
+  - `requirements_hint` (dict, optional): cluster/partition/cpu/mem/gpu 偏好
+  
+  ### Simulation Builder
+  **When to delegate**: 链路上游需要构建仿真输入 deck（OpenMC/MCNP6/FISPACT-II/DAGMC/natf/tricys）。
+  **Required prompt fields** (see `.opencode/agent/simulation-builder.md` → `### 调用方需提供`):
+  - `target_code` (enum, required): `openmc` | `mcnp6` | `fispact-ii` | `dagmc` | `natf` | `tricys`
+  - `geometry_intent` (str, required)
+  - `materials` (list[dict], optional)
+  - `source_definition` (dict, optional)
+  - `tally_requirements` (list[str], optional)
+  - `output_workdir` (path, required)
+  
+  ### Simulation Analyst
+  **When to delegate**: 链路下游需要对 statepoint / outp / inventory 等输出做后处理与绘图。
+  **Required prompt fields** (see `.opencode/agent/simulation-analyst.md` → `### 调用方需提供`):
+  - `output_paths` (list[path], required)
+  - `source_code` (enum, required): `openmc` | `mcnp6` | `fispact-ii` | `dagmc` | `natf` | `tricys`
+  - `target_metrics` (list[str], required)
+  - `preferred_plots` (list[str], optional)
+  - `comparison_baseline` (dict, optional)
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Output expectations` 章节输出，首行必须为 `**Status**`（`COMPLETED` / `PARTIAL` / `BLOCKED`），包含各 stage 的 task_id 与状态、产物路径、失败 stage 的 stderr 摘要与下一步建议。
+  
+delegates:
+  - {id: scnet-hpc-coordinator, name: Scnet HPC Coordinator}
+  - {id: pm-coordinator, name: PM Coordinator}
+  - {id: simulation-analyst, name: Simulation Analyst}
+delivery_tier: specialist
+revision: 8
+argument_hint: Provide chain spec YAML path (e.g. examples/chains/wp2_cool_csg.yaml) OR chain_id to resume OR single-step inputs_dir + parameters. Optionally pin cluster.

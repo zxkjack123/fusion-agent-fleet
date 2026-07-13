@@ -1,0 +1,99 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `manuscript_path` (path, required): 待审稿件（md / docx / latex / pdf）
+  - `target_venue` (str, optional): 投稿目标期刊/会议
+  - `review_depth` (enum, optional, default `standard`): `quick` | `standard` | `deep`
+  - `focus_dimensions` (list[str], optional, default `["methodology","logic","evidence","presentation","compliance"]`)
+  - `reviewer_persona` (enum, optional): `editor` | `peer` | `adversarial`
+  - `prior_reviews` (list[path], optional): 已有审稿意见（用于补充视角）
+  - `manuscript_lint_report` (path, optional): 预跑 manuscript-lint 报告
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  输出必须以 `**Status**` 行开头（`COMPLETED` / `PARTIAL` / `BLOCKED`），按 Stage F 报告结构：(1) Summary Recommendation（Accept / Minor / Major / Reject）；(2) Major Comments；(3) Minor Comments；(4) Cross-Validation Summary（Pattern A）；(5) Gap-Finder 二阶审查结论；(6) Pre-Delivery Audit 表（L2-Standard）；(7) De-AI-Fier Gate 标记。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  *Pattern A 委派时，两个 sub-agent 的字段必须保持一致（同 manuscript_path / target_venue），仅在 review_focus 字段上区分；合并去重时按 finding 的 location + claim_text 做 key。*
+  
+  When delegating to sub-agents via `opencode task`, construct prompts using the templates below.
+  
+  ### Critical Thinking
+  **When to delegate**: 方法论评估 / reviewer 质疑前挑战假设
+  **Required prompt fields**:
+  - `assumption_list`: 稿件中的关键假设
+  - `current_decision`: 作者的论证路径
+  - `requested_verdict_type`: full_socratic | red_flag_only
+  - `domain_context` (optional)
+  **Expected return shape**: see `.opencode/agent/critical-thinking.md` → `### Final Report 强制格式`
+  
+  ### Structure-Format Scanner
+  **When to delegate**: 投稿前结构/格式一致性检查
+  **Required prompt fields**:
+  - `manuscript_path`: 稿件路径
+  - `target_venue` (optional): 触发 venue 特定规则
+  - `profile: paper | patent | report | thesis | proposal`
+  **Expected return shape**: structured per-rule findings list
+  
+  ### Methodology Deep Reviewer
+  **When to delegate**: 方法论深度审查（数值方法 / 仿真设置 / 实验设计）
+  **Required prompt fields**:
+  - `manuscript_path`: 稿件路径
+  - `review_focus: numerical | experimental | simulation | general`
+  - `target_venue` (optional)
+  **Expected return shape**: structured per-section methodology findings
+  
+  ### Innovation Reviewer
+  **When to delegate**: 创新性评估 / prior art 检索
+  **Required prompt fields** (see `.opencode/agent/innovation-reviewer.md` → `### 调用方需提供`):
+  - `document_path`, `document_type`, `target_venue`, `domain`, `review_depth`
+  **Expected return shape**: see `.opencode/agent/innovation-reviewer.md` → `### Final Report 强制格式`
+  
+  ### Figure Quality Reviewer
+  **When to delegate**: 图表视觉质量审查
+  **Required prompt fields** (see `.opencode/agent/figure-quality-reviewer.md` → `### 调用方需提供`):
+  - `figure_paths`, `manuscript_context`, `target_venue`, `document_type`
+  **Expected return shape**: per-figure structured review report
+  
+  ### Doublecheck
+  **When to delegate**: 系统性事实核查 / 引用验证
+  **Required prompt fields** (see `.opencode/agent/doublecheck.md` → `### 调用方需提供`):
+  - `document_path` OR `claim_list`, `document_type`, `verification_budget`, `mode`
+  **Expected return shape**: see `.opencode/agent/doublecheck.md` → `### Final Report 强制格式`
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  输出必须以 `**Status**` 行开头（`COMPLETED` / `PARTIAL` / `BLOCKED`），按 Stage F 报告结构：(1) Summary Recommendation（Accept / Minor / Major / Reject）；(2) Major Comments；(3) Minor Comments；(4) Cross-Validation Summary（Pattern A）；(5) Gap-Finder 二阶审查结论；(6) Pre-Delivery Audit 表（L2-Standard）；(7) De-AI-Fier Gate 标记。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: innovation-reviewer, name: Innovation Reviewer}
+  - {id: doublecheck, name: Doublecheck}
+  - {id: scientific-paper-research, name: Scientific Paper Research}
+  - {id: critical-thinking, name: Critical Thinking}
+  - {id: format-engineer, name: Format Engineer}
+  - {id: structure-format-scanner, name: Structure-Format Scanner}
+  - {id: methodology-deep-reviewer, name: Methodology Deep Reviewer}
+  - {id: figure-quality-reviewer, name: Figure Quality Reviewer}
+  - {id: figure-analyst, name: Figure Analyst}
+handoffs:
+  - {id: academic-writer, label: Light fix → Academic Writer, name: Academic Writer, prompt: 'The attached review report recommends a Light revision path. Execute Mode B (Rewrite/Polish) on the manuscript, focusing on the issues marked 🔴 and 🟡 in the review.'}
+  - {id: plan-architect, label: Medium fix → Plan Architect, name: Plan Architect, prompt: 'The attached review report recommends a Medium revision path requiring manuscript restructuring. Generate a document revision plan (文档修改计划) based on the review findings, then hand off to Academic Writer Mode C.'}
+  - {id: fusion-deep-research, label: Heavy fix → Fusion Deep Research, name: Fusion Deep Research, prompt: 'The attached review report recommends a Heavy revision path requiring supplementary computation/simulation before manuscript revision. Execute Route R-REVISE: (1) delegate to Plan Architect for a revision plan using 文档修改计划模板, (2) orchestrate computation tasks (simulation re-runs, post-processing, data analysis) identified in the review, (3) hand off text revision to Academic Writer Mode C with the computation evidence bundle.'}
+  - {id: review-responder, label: Draft response letter, name: Review Responder, prompt: Draft a point-by-point response letter based on the review report. Address each issue with specific revision actions.}
+delivery_tier: specialist
+revision: 25
+argument_hint: Provide manuscript file/URL + target journal/venue (optional) + review depth (quick/deep)

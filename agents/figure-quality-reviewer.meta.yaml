@@ -1,0 +1,35 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `figure_paths`: List of file paths to figure images (PNG, JPG, PDF, SVG)
+  - `manuscript_context`: For each figure, the relevant text claims that reference it (e.g., "Fig. 3 shows monotonically increasing TBR with Li-6 enrichment")
+  - `target_venue` (optional): Target journal or venue name for publication adaptability checks
+  - `document_type` (optional): "paper" | "patent" | "report" | "proposal" — affects which special-case criteria apply
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  N/A — this agent is a leaf specialist with no outbound delegation.
+  All tool calls are direct MCP / built-in operations; no sub-agent orchestration required.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  
+  | Section | Content |
+  |---------|---------|
+  | **Status** | COMPLETED | ✅ |
+  | **Summary** | Figure analysis results | ✅ |
+  | **Artifacts** | Extracted data paths | ✅ |
+  | **Test Results** | N/A | ❌ |
+  | **Commit** | <hash> | ✅ |
+  
+delivery_tier: sub-only
+revision: 5
+argument_hint: Provide figure file paths (list) + manuscript context (key claims referencing each figure) + target venue (optional)
+delegates: []

@@ -1,0 +1,54 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `source_text_path` 或 `source_text_inline`（二选一必填）：待处理文本的路径或内联内容
+  - `target_language`: zh | en（必填）
+  - `polish_mode`: terminology_only | full_polish | abstract_optimization | audit_only（默认 full_polish）
+  - `venue_style` (optional): 目标期刊/会议（如 "FED" / "NF" / "PST"），触发对应风格惯例
+  - `glossary_path` (optional): 用户自定义术语表路径；与 §Fusion Terminology Baseline 冲突时以 caller 指定的 `glossary_priority` 字段为准
+  - `glossary_priority` (optional): user_first | baseline_first（默认 baseline_first）
+  - `forbidden_changes` (optional): 不可改动的术语、数字、引用编号等列表
+  - `output_path` (optional): 输出文件路径；省略则由 BP 选择
+  - `export_format` (optional): md | docx | latex | epub（docx/latex/epub 触发委派给 Format Engineer）
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  使用上文 `## BP Final Report` section 定义的格式输出，必须包含 `**Status**` 字段（语义详见 `### Status Semantics` 表）以及术语冲突、警告、跳过段落三个子段。当 caller 设置 `export_format` 时，Final Report 必须列出 Format Engineer 返回的最终产物路径。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Explore (OpenCode built-in)
+  **When to delegate**: Quick read-only codebase search, file discovery, or dependency tracing.
+  **Required prompt fields**: N/A — Explore is a built-in subagent with no project-local agent contract file.
+  Expected return shape: File paths, search results, or code snippets relevant to the query.
+  
+  ### Format Engineer
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/format-engineer.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/format-engineer.md` → `### Final Report 强制格式`.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  使用上文 `## BP Final Report` section 定义的格式输出，必须包含 `**Status**` 字段（语义详见 `### Status Semantics` 表）以及术语冲突、警告、跳过段落三个子段。当 caller 设置 `export_format` 时，Final Report 必须列出 Format Engineer 返回的最终产物路径。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: format-engineer, name: Format Engineer}
+delivery_tier: specialist
+revision: 9
+argument_hint: Provide document path, operation mode (zh→en/en→zh/polish), and target style or venue

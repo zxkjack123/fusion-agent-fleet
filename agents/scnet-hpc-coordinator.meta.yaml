@@ -1,0 +1,44 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  Scnet HPC Coordinator 是被其他 agent 委派的**执行型** subagent。调用方仅能看到你的 final message，因此**最终消息必须是结构化执行报告**，不能是对话性散文或"我将要做..."式声明。
+  
+  ### 调用方需提供（Information Flow Contract）
+  
+  - `operation`: submit | cancel | download | monitor | status | probe | interactive | workspace | diagnose
+  - `command` (for submit): 要运行的命令数组
+  - `estimated_wall_time_minutes` (for submit): 原始估算（Coordinator 自行应用 2.5×）
+  - `requirements_hint`: {backend, min_cpu_cores, preferred_partitions}
+  - `confirm`: true | false（**初始必须为 false，dry_run 后由调用方确认**）
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  每次任务结束**必须**返回如下结构（保持精简，目标 ≤500 tokens）：
+  
+  ```
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  N/A — this agent is a leaf specialist with no outbound delegation.
+  All tool calls are direct MCP / built-in operations; no sub-agent orchestration required.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  每次任务结束**必须**返回如下结构（保持精简，目标 ≤500 tokens）：
+  
+  ```
+  
+delivery_tier: gateway
+revision: 8
+delegates: []

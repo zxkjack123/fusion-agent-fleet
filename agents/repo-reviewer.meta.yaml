@@ -1,0 +1,73 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `repo_path` (path, required, default 当前 workspace): 待审 repo 根目录
+  - `focus_areas` (list[str], optional, default `["todo_debt","bug_risk","maintainability","optimization"]`)
+  - `severity_floor` (enum, optional, default `warning`): `info` | `warning` | `error`
+  - `output_format` (enum, optional, default `structured`): `structured` | `narrative`
+  - `target_paths` (list[path], optional): 限定子目录/文件范围
+  - `exclude_globs` (list[str], optional): 排除的 glob 模式
+  - `parallel_subagents` (bool, optional, default `true`): 是否启用 Stage ⑤ Pattern A
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Executive Summary` 与 Stage ⑦ 报告模板输出。首行必须为 `**Status**`（`COMPLETED` / `PARTIAL` / `BLOCKED`），包含 ① Repository Overview / ② Incomplete Tasks / ③ Code Quality Issues / ④ Potential Bugs / ⑤ Optimization Opportunities 五段，并附 Cross-Validation Summary（Pattern A）与建议优先级。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  *散文中已有的委派流程描述仅作参考；本段为字段权威定义。*
+  
+  When delegating to sub-agents via `opencode task`, construct prompts using the templates below.
+  
+  ### Deep Reviewer
+  **When to delegate**: Stage ⑤ Pattern A 子代理，对关键模块做业务逻辑/竞态/边界深度审查。
+  **Required prompt fields** (see `.opencode/agent/deep-reviewer.md` → `### 调用方需提供`):
+  - `target_files` (list[path], required)
+  - `focus_areas` (list[str], optional, default `["business_logic","race_condition","boundary_check","input_validation"]`)
+  - `severity_floor` (enum, optional, default `warning`)
+  - `max_modules` (int, optional)
+  
+  ### Deep Reviewer (`mode=systemic`)
+  **When to delegate**: Stage ⑤ Pattern A 子代理，跨文件扫描共性反模式（连接泄漏、非原子 IO、异常吞噬、路径穿越等）。
+  **Required prompt fields** (see `.opencode/agent/deep-reviewer.md` → `### 调用方需提供`):
+  - `mode` (enum, required): `systemic`
+  - `repo_path` (path, required)
+  - `scan_patterns` (list[str], optional, default `["connection_leak","non_atomic_io","exception_swallow","path_traversal"]`)
+  - `exclude_globs` (list[str], optional)
+  - `severity_floor` (enum, optional, default `warning`)
+  
+  ### Plan Architect
+  **When to delegate**: 审查报告需转化为可执行整改计划（多任务、多 wave）。
+  **Required prompt fields** (see `.opencode/agent/plan-architect.md` → `### 调用方需提供`):
+  - `requirements_summary` (str, required): 整改目标摘要
+  - `affected_files_hint` (list[path], optional)
+  - `scope_mode` (enum, optional, default `HOLD`): `HOLD` | `EXPANSION` | `REDUCTION`
+  - `plan_schema_version` (str, optional, default `1.1`)
+  
+  **MODIFY_SPEC handoff**: 报告表 ②③④⑤ 含 `MODIFY_SPEC` 列（machine-readable 结构化修改描述）。Plan Architect 应优先消费该列填入 task 的 `modify_specs` 字段，仅在 MODIFY_SPEC 为空时 fallback 到 `Remediation` 自由文本推导。格式: `action:<enum>, file:<path>, target:<anchor>, description:<text>`。
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Executive Summary` 与 Stage ⑦ 报告模板输出。首行必须为 `**Status**`（`COMPLETED` / `PARTIAL` / `BLOCKED`），包含 ① Repository Overview / ② Incomplete Tasks / ③ Code Quality Issues / ④ Potential Bugs / ⑤ Optimization Opportunities 五段，并附 Cross-Validation Summary（Pattern A）与建议优先级。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: critical-thinking, name: Critical Thinking}
+  - {id: deep-reviewer, name: Deep Reviewer}
+handoffs:
+  - {id: plan-architect, label: Plan remediation roadmap, name: Plan Architect, prompt: 'Use the current repository review findings and generate an executable phased implementation plan with clear boundaries, tests, and acceptance criteria.'}
+delivery_tier: producer-internal
+revision: 11
+argument_hint: Provide repo path (or current workspace) and optional focus areas (e.g., TODO debt, bug risk, security, performance, docs quality).

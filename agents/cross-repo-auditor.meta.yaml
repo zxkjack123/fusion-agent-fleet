@@ -1,0 +1,7 @@
+delivery_tier: producer-internal
+outbound_delegation_schemas: N/A
+return_envelope: v1
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+
+  N/A — leaf agent with no downstream delegations.

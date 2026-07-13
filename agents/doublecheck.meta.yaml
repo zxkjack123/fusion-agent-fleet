@@ -1,0 +1,69 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `document_path` OR `claim_list`: 待核查文档绝对路径，或显式 claim 文本列表
+  - `document_type` (optional): paper | report | response_letter | proposal
+  - `bib_path` (optional): 关联 .bib 文件路径（若有，自动触发 citation-lint 预筛）
+  - `verification_budget`: 最大 claim 数（默认 30；超出触发 budget cap）
+  - `prior_ledger_path` (optional): 上一轮 JSONL ledger（用于增量验证）
+  - `mode`: full | citations_only | claims_only（默认 full）
+  
+  ### Final Report 强制格式
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  （沿用下方模板——该段为强制返回模板）
+  
+  ```markdown
+  # Verification Report
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  *散文中已有的委派流程描述仅作参考；本段为字段权威定义。*
+  
+  When delegating to sub-agents via `opencode task`, construct prompts using the templates below.
+  
+  ### Claim Verifier
+  **When to delegate**: 高风险数值声明、外部事实引用需要独立查证。
+  **Required prompt fields** (see `.opencode/agent/claim-verifier.md` → `### 调用方需提供`):
+  - `claims` (list[dict], required): 含 `claim_text` / `source_hint` / `expected_range`
+  - `verification_depth` (enum, optional, default `standard`)
+  - `evidence_required` (bool, optional, default `true`)
+  
+  ### Citation Scanner
+  **When to delegate**: 文中所有引用 ↔ 参考文献交叉核对，DOI 解析，phantom/uncited 排查。
+  **Required prompt fields** (see `.opencode/agent/citation-scanner.md` → `### 调用方需提供`):
+  - `manuscript_path` (path, required)
+  - `bib_path` (path, required)
+  - `citation_style` (enum, optional, default `auto`)
+  
+  ### Critical Thinking
+  **When to delegate**: 当 verification 揭示矛盾、需对结论可证伪性做反证审查。
+  **Required prompt fields** (see `.opencode/agent/critical-thinking.md` → `### 调用方需提供`):
+  - `question` (str, required)
+  - `context` (str, required)
+  - `stance` (enum, optional, default `challenge`)
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  （沿用下方模板——该段为强制返回模板）
+  
+  ```markdown
+  # Verification Report
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: scientific-paper-research, name: Scientific Paper Research}
+  - {id: citation-scanner, name: Citation Scanner}
+  - {id: claim-verifier, name: Claim Verifier}
+  - {id: critical-thinking, name: Critical Thinking}
+delivery_tier: specialist
+revision: 9

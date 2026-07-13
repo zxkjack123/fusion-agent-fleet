@@ -1,0 +1,88 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `teaching_topic` (str, required): 教学主题/单元名称
+  - `target_level` (enum, required): `UG` | `MS` | `PhD` | `mixed`
+  - `material_type` (enum, required): `lecture_notes` | `slides` | `exercises` | `lab_guide` | `exam` | `syllabus`
+  - `duration_estimate` (str, optional): 例如 `"90 min lecture"` 或 `"2 weeks"`
+  - `prerequisites` (list[str], optional): 学生先修知识
+  - `language` (enum, optional, default `zh`): `zh` | `en` | `bilingual`
+  - `existing_materials` (list[path], optional): 已有讲义/PPT 可重用
+  - `reference_books` (list[str], optional): 推荐参考教材
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  输出必须以 `**Status**` 行开头（`COMPLETED` / `PARTIAL` / `BLOCKED`），按 Workflow Stage E 输出：(1) 教学材料文件路径；(2) 学习目标（Bloom 分类）；(3) 大纲与时长分配；(4) 关键概念清单；(5) 练习/作业（含答案）；(6) 引用与图表来源；(7) Pre-Delivery Audit 标记。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Explore (OpenCode built-in)
+  **When to delegate**: Quick read-only codebase search, file discovery, or dependency tracing.
+  **Required prompt fields**: N/A — Explore is a built-in subagent with no project-local agent contract file.
+  Expected return shape: File paths, search results, or code snippets relevant to the query.
+  
+  ### Scientific Paper Research
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/scientific-paper-research.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/scientific-paper-research.md` → `### Final Report 强制格式`.
+  
+  ### Critical Thinking
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/critical-thinking.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/critical-thinking.md` → `### Final Report 强制格式`.
+  
+  ### Diagram Architect
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/diagram-architect.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/diagram-architect.md` → `### Final Report 强制格式`.
+  
+  ### Presentation Architect
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/presentation-architect.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/presentation-architect.md` → `### Final Report 强制格式`.
+  
+  ### Figure Analyst
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/figure-analyst.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/figure-analyst.md` → `### Final Report 强制格式`.
+  
+  ### Figure Quality Reviewer
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/figure-quality-reviewer.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/figure-quality-reviewer.md` → `### Final Report 强制格式`.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  输出必须以 `**Status**` 行开头（`COMPLETED` / `PARTIAL` / `BLOCKED`），按 Workflow Stage E 输出：(1) 教学材料文件路径；(2) 学习目标（Bloom 分类）；(3) 大纲与时长分配；(4) 关键概念清单；(5) 练习/作业（含答案）；(6) 引用与图表来源；(7) Pre-Delivery Audit 标记。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: scientific-paper-research, name: Scientific Paper Research}
+  - {id: critical-thinking, name: Critical Thinking}
+  - {id: diagram-architect, name: Diagram Architect}
+  - {id: presentation-architect, name: Presentation Architect}
+  - {id: figure-analyst, name: Figure Analyst}
+  - {id: figure-quality-reviewer, name: Figure Quality Reviewer}
+delivery_tier: producer-external
+revision: 9
+argument_hint: Provide teaching topic, target level (UG/MS/PhD), and desired material type

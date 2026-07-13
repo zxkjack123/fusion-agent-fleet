@@ -1,0 +1,51 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `manuscript_path`: 稿件路径（必填）
+  - `venue_template`: 目标期刊模板名（如 "NF" / "FED" / "FST" / "PST"）或 "generic"（默认 generic）
+  - `required_sections` (optional): 期刊要求的必填 section 列表（如 ["Abstract", "Introduction", "Methods", "Results", "Discussion", "Conclusion"]）
+  - `scan_depth`: quick（仅 D1+D2） | standard（D1–D4） | full（D1–D5 含期刊模板检查）（默认 standard）
+  - `severity_floor` (optional): info | warning | critical（默认 warning）
+  - `prior_findings` (optional): 深度轴（methodology-deep-reviewer）或创新轴（innovation-reviewer）已报告的发现，用于去重
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  使用上文 `## Output Format` section 定义的结构化输出（`## Summary` + D1–D5），并在 `## Summary` 之首加一行：
+  
+  ```
+  **Status**: COMPLETED | PARTIAL | FAILED | BLOCKED
+  **Findings**: D1=a, D2=b, D3=c, D4=d, D5=e (total N, 🔴=x, 🟡=y, 🟢=z)
+  **Template**: [venue_template used]
+  ```
+  
+  Status 语义：COMPLETED = scan_depth 范围全部扫完；PARTIAL = 某个维度因缺 venue_template 不可检；FAILED = 稿件不可读、格式不支持；BLOCKED = 需 caller 明确 venue_template 或 required_sections。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  N/A — this agent is a leaf specialist with no outbound delegation.
+  All tool calls are direct MCP / built-in operations; no sub-agent orchestration required.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  使用上文 `## Output Format` section 定义的结构化输出（`## Summary` + D1–D5），并在 `## Summary` 之首加一行：
+  
+  ```
+  **Status**: COMPLETED | PARTIAL | FAILED | BLOCKED
+  **Findings**: D1=a, D2=b, D3=c, D4=d, D5=e (total N, 🔴=x, 🟡=y, 🟢=z)
+  **Template**: [venue_template used]
+  ```
+  
+  Status 语义：COMPLETED = scan_depth 范围全部扫完；PARTIAL = 某个维度因缺 venue_template 不可检；FAILED = 稿件不可读、格式不支持；BLOCKED = 需 caller 明确 venue_template 或 required_sections。
+  
+delivery_tier: sub-only
+revision: 5
+argument_hint: Provide manuscript content (markdown) + target journal (optional) → structured report of format/structural issues.
+delegates: []

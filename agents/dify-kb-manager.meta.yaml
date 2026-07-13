@@ -1,0 +1,53 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `operation_mode` (enum, required): `create` | `ingest` | `search` | `list` | `delete`
+  - `kb_name` (str, required): 知识库名称
+  - `file_paths` (list[path], optional): ingest 模式必填
+  - `inline_content` (str, optional): 直接传入文本内容（替代 file_paths）
+  - `metadata` (dict, optional): 文档元数据
+  - `tags` (list[str], optional)
+  - `chunk_strategy` (dict, optional): 分块策略覆盖
+  - `dedup_check` (bool, optional, default `true`): 入库前去重检查
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Final Report` 章节输出，首行必须为 `**Status**`（`COMPLETED` / `PARTIAL` / `BLOCKED`），包含操作类型、KB 标识、影响文档数、错误清单与下一步建议。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Explore (OpenCode built-in)
+  **When to delegate**: Quick read-only codebase search, file discovery, or dependency tracing.
+  **Required prompt fields**: N/A — Explore is a built-in subagent with no project-local agent contract file.
+  Expected return shape: File paths, search results, or code snippets relevant to the query.
+  
+  ### Format Engineer
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/format-engineer.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/format-engineer.md` → `### Final Report 强制格式`.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Final Report` 章节输出，首行必须为 `**Status**`（`COMPLETED` / `PARTIAL` / `BLOCKED`），包含操作类型、KB 标识、影响文档数、错误清单与下一步建议。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: format-engineer, name: Format Engineer}
+delivery_tier: specialist
+revision: 4
+argument_hint: Provide target KB name, file paths or inline content, and operation mode (create/ingest/search/list)

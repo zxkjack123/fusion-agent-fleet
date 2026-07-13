@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the paper below."
+title: "A Multi-Agent Architecture for Autonomous Fusion Nuclear Engineering Research"
+authors:
+  - family-names: "[Author Name]"
+    affiliation: "Institute of Plasma Physics, Chinese Academy of Sciences (ASIPP), Hefei 230031, China"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+  - family-names: "[Co-Author Name]"
+repository-code: "https://github.com/[username]/fusion-agent-fleet"
+url: "https://github.com/[username]/fusion-agent-fleet"
+license: MIT
+year: 2026

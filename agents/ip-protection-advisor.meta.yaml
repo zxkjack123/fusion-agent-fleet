@@ -1,0 +1,124 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  
+  ```yaml
+  inbound_contract:
+    fields:
+      - name: mode
+        type: enum
+        values: [M1, M2, M3, M4, M5]
+        required: false
+        description: "不提供则 advisor 自推断"
+      - name: artifacts
+        type: list[path] | str
+        required: true
+        description: "待评估的稿件/代码/模型描述/任务书路径或粘贴内容"
+      - name: project_name
+        type: str
+        required: false
+        description: "项目名/任务编号"
+      - name: funding_source
+        type: str
+        required: false
+        description: "资助来源"
+      - name: collaborators
+        type: list[str]
+        required: false
+        description: "合作方/委托方/学生贡献者"
+      - name: publication_plan
+        type: dict
+        required: false
+        description: "{target_venue, target_date, status}"
+      - name: existing_disclosure
+        type: path
+        required: false
+        description: "已有发明披露材料"
+      - name: urgency
+        type: enum
+        values: [urgent, normal, tracking]
+        required: false
+        default: normal
+        description: "紧急程度"
+  ```
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 Stage D 输出对应 mode 的交付物，并在末尾包含：
+  - `**Status**`: `COMPLETED` / `PARTIAL` / `BLOCKED`
+  - 触发的政策依据条款（KB 引用）
+  - 不确定项 / 待人工评估项清单
+  - 建议升级 / handoff 路径
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Explore (OpenCode built-in)
+  **When to delegate**: Quick read-only codebase search, file discovery, or dependency tracing.
+  **Required prompt fields**: N/A — Explore is a built-in subagent with no project-local agent contract file.
+  Expected return shape: File paths, search results, or code snippets relevant to the query.
+  
+  ### Innovation Reviewer
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/innovation-reviewer.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/innovation-reviewer.md` → `### Final Report 强制格式`.
+  
+  ### Patent Writer
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/patent-writer.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/patent-writer.md` → `### Final Report 强制格式`.
+  
+  ### Critical Thinking
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/critical-thinking.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/critical-thinking.md` → `### Final Report 强制格式`.
+  
+  ### Scientific Paper Research
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/scientific-paper-research.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/scientific-paper-research.md` → `### Final Report 强制格式`.
+  
+  ### PM Coordinator
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/pm-coordinator.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/pm-coordinator.md` → `### Final Report 强制格式`.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 Stage D 输出对应 mode 的交付物，并在末尾包含：
+  - `**Status**`: `COMPLETED` / `PARTIAL` / `BLOCKED`
+  - 触发的政策依据条款（KB 引用）
+  - 不确定项 / 待人工评估项清单
+  - 建议升级 / handoff 路径
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: innovation-reviewer, name: Innovation Reviewer}
+  - {id: patent-writer, name: Patent Writer}
+  - {id: critical-thinking, name: Critical Thinking}
+  - {id: scientific-paper-research, name: Scientific Paper Research}
+  - {id: pm-coordinator, name: PM Coordinator}
+handoffs:
+  - {id: patent-writer, label: Draft full patent application, name: Patent Writer, prompt: User has confirmed an invention is worth filing. Use the invention-disclosure one-pager prepared by IP Protection Advisor as input; produce a CN 发明专利 application unless user specifies otherwise.}
+  - {id: innovation-reviewer, label: Run formal novelty check, name: Innovation Reviewer, prompt: Run a five-dimension novelty assessment with prior-art search on the invention candidate described in the disclosure one-pager.}
+delivery_tier: specialist
+revision: 5
+argument_hint: Provide the artifact under review (file path / URL / pasted content) + intent (pre-publication check / project classification / disclosure draft / collaboration权属)

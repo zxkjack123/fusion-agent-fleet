@@ -1,0 +1,62 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  上文 `## Input Contract` section 定义了完整输入 schema：`claims`、`categories`、`source_context` 为必填字段。附加可选字段：
+  
+  - `verification_depth`: shallow（仅 Stage ①+②） | standard（①–④ 全部） | deep（④ 重点展开）（默认 standard）
+  - `tolerance` (optional): 数值验证的相对误差阈值，默认 5%；caller 可重载为 `0.01` / `0.10`
+  - `evidence_sources` (optional): 允许检索的证据源（如 ["semantic-scholar", "crossref", "crawl4ai"]）；默认按 Stage①—④ 依次调用
+  - `reporting_format` (optional): markdown_table | json_inline（默认 markdown_table，即上文输出格式）
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  使用上文 `## Output Format` + `## Claim Verification Results` section 定义的结构化输出，并在首行加：
+  
+  ```
+  **Status**: COMPLETED | PARTIAL | FAILED | BLOCKED
+  **Claims verified**: N / M (verified=x, unverifiable=y, refuted=z)
+  **Tolerance**: ±[数值]
+  ```
+  
+  Status 语义：COMPLETED = 所有 categories 均处理；PARTIAL = 部分 claim 因证据源不可达标 UNVERIFIABLE；FAILED = `claims` 缺失或格式错误；BLOCKED = 需 caller 补充 `source_context` 或 `attributed_source`。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Explore (OpenCode built-in)
+  **When to delegate**: Quick read-only codebase search, file discovery, or dependency tracing.
+  **Required prompt fields**: N/A — Explore is a built-in subagent with no project-local agent contract file.
+  Expected return shape: File paths, search results, or code snippets relevant to the query.
+  
+  ### Scientific Paper Research
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/scientific-paper-research.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/scientific-paper-research.md` → `### Final Report 强制格式`.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  使用上文 `## Output Format` + `## Claim Verification Results` section 定义的结构化输出，并在首行加：
+  
+  ```
+  **Status**: COMPLETED | PARTIAL | FAILED | BLOCKED
+  **Claims verified**: N / M (verified=x, unverifiable=y, refuted=z)
+  **Tolerance**: ±[数值]
+  ```
+  
+  Status 语义：COMPLETED = 所有 categories 均处理；PARTIAL = 部分 claim 因证据源不可达标 UNVERIFIABLE；FAILED = `claims` 缺失或格式错误；BLOCKED = 需 caller 补充 `source_context` 或 `attributed_source`。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: scientific-paper-research, name: Scientific Paper Research}
+delivery_tier: sub-only
+revision: 5

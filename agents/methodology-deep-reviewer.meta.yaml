@@ -1,0 +1,64 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `manuscript_path`: 稿件路径（必填，md/tex/docx）
+  - `section_scope` (optional): 限定审查范围（如 ["Methods", "Results", "Discussion"]）；默认覆盖全部正文
+  - `venue_context` (optional): 目标期刊（如 "NF" / "FED"），触发期刊专用方法学惯例检查
+  - `focus_axes` (optional): 限定审查维度子集（["D1", "D2", "D3", "D4"]）；默认全部四个维度
+  - `prior_review_findings` (optional): caller 传入的 breadth-axis或 innovation-reviewer 结果，用于避免重复报告
+  - `severity_floor` (optional): info | warning | error（默认 warning，低于该级别的发现不计入主报告）
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  使用上文 `## Output Format` section 定义的结构化输出（`## Summary` + D1–D4 + CT-Verified Concerns），并在 `## Summary` 之首加一行：
+  
+  ```
+  **Status**: COMPLETED | PARTIAL | FAILED | BLOCKED
+  **Findings**: D1=a, D2=b, D3=c, D4=d (total N, severity≥warning M)
+  **CT-verified concerns**: K
+  ```
+  
+  Status 语义：COMPLETED = 所有 focus_axes 已审查；PARTIAL = 某轴因缺少上下文被跳过；FAILED = 稿件不可读或格式不支持；BLOCKED = 需 caller 提供 venue_context 或 prior_review_findings。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Critical Thinking
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/critical-thinking.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/critical-thinking.md` → `### Final Report 强制格式`.
+  
+  ### Figure Analyst
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/figure-analyst.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/figure-analyst.md` → `### Final Report 强制格式`.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  使用上文 `## Output Format` section 定义的结构化输出（`## Summary` + D1–D4 + CT-Verified Concerns），并在 `## Summary` 之首加一行：
+  
+  ```
+  **Status**: COMPLETED | PARTIAL | FAILED | BLOCKED
+  **Findings**: D1=a, D2=b, D3=c, D4=d (total N, severity≥warning M)
+  **CT-verified concerns**: K
+  ```
+  
+  Status 语义：COMPLETED = 所有 focus_axes 已审查；PARTIAL = 某轴因缺少上下文被跳过；FAILED = 稿件不可读或格式不支持；BLOCKED = 需 caller 提供 venue_context 或 prior_review_findings。
+  
+delegates:
+  - {id: critical-thinking, name: Critical Thinking}
+  - {id: figure-analyst, name: Figure Analyst}
+delivery_tier: sub-only
+revision: 6
+argument_hint: Provide manuscript content (markdown) + identified methodology claims + target journal (optional) → structured deep review report.

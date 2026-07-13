@@ -1,0 +1,27 @@
+delivery_tier: producer-internal
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+
+  ### 调用方需提供
+  - `mode` (enum, required): `pre` | `post`
+  - `target_agent_name` (string, required): 目标 agent 名称
+  - `target_agent_tier` (enum, required): orchestrator | producer-external | producer-internal | specialist
+  - `agent_output_text` (string, required for mode=post): 目标 agent 的完整输出文本
+
+  ### Final Report 强制格式
+  
+  Gate Report 格式见 agent body `## Output Format` section。第一行 `verdict: <PASS|WARN|FAIL|BLOCK>`，随后是 Gate Results 表格和 Summary。
+return_envelope: v1
+return_envelope_text: |
+  ### Final Report 强制格式
+
+  report_format_version: 1
+
+  **Status**: COMPLETED | PARTIAL | FAILED | BLOCKED
+
+  Gate Report 格式见上文 `## Output Format` section。第一行 `verdict: <PASS|WARN|FAIL|BLOCK>`，随后是 Gate Results 表格和 Summary。
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+
+  N/A — leaf agent with no downstream delegations.
+revision: 1

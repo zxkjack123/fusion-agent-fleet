@@ -1,0 +1,60 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `fund_type` (enum, required): `NSFC_general` | `NSFC_young` | `NSFC_key` | `MOST` | `CAS_internal` | `province` | `other`
+  - `research_topic` (str, required): 研究主题与拟解决的科学问题
+  - `materials_paths` (list[path], required): 已有研究材料（前期论文/数据/PPT）
+  - `constraints` (dict, optional): `page_limit` / `budget_limit` / `timeline` / `team_size`
+  - `template_overrides` (dict, optional): 自定义节标题或格式覆盖
+  - `target_language` (enum, optional, default `zh`): `zh` | `en` | `bilingual`
+  - `prior_review_feedback` (path, optional): 上一年度未中评审意见
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  输出必须以 `**Status**` 行开头（`COMPLETED` / `PARTIAL` / `BLOCKED`），按 Workflow Stage F 输出完整申请书：(1) 立项依据；(2) 研究内容与目标；(3) 拟采取的研究方案；(4) 创新点与可行性分析；(5) 年度计划与预期成果；(6) 工作基础与条件；(7) 经费预算；(8) Pre-Delivery Audit 表（L2-Standard）；(9) De-AI-Fier Gate 标记；(10) 评审视角自检表。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  本 agent 委派以下 sub-agent。调用时需提供的字段须与 callee 的 `### 调用方需提供` 定义一致。
+  
+  ### When to delegate to Critical Thinking
+  在 Stage C（创新点论证）、Stage E.2（可行性反证）时委派。Required prompt fields (see `.opencode/agent/critical-thinking.md` → `### 调用方需提供`): `question`、`context`、`stance=challenge`。
+  
+  ### When to delegate to Citation Scanner
+  在 Stage F 质量门检查立项依据中的文献时委派。Required prompt fields (see `.opencode/agent/citation-scanner.md` → `### 调用方需提供`): `references` (上文 Input Contract) 为必填；proposal-writer 可补充 `manuscript_path`、`bib_path`、`scan_mode=metadata_full`、`severity_floor=warning`。
+  
+  ### When to delegate to Innovation Reviewer
+  在 Stage C 创新点提炼后委派，评估与现有文献的 differentiation。Required prompt fields (see `.opencode/agent/innovation-reviewer.md` → `### 调用方需提供`)：传递 `manuscript_path`、`innovation_claims` (list)、`benchmark_corpus`、`focus_axes`。
+  
+  ### When to delegate to Diagram Architect
+  在 Stage D（研究方案 / 技术路线图）需要发表级示意图时委派。Required prompt fields (see `.opencode/agent/diagram-architect.md` → `### 调用方需提供`): `diagram_intent`、`diagram_type`、`output_context=report`；proposal-writer 推荐补充 `target_venue`、`output_formats=["pdf"]`。
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  输出必须以 `**Status**` 行开头（`COMPLETED` / `PARTIAL` / `BLOCKED`），按 Workflow Stage F 输出完整申请书：(1) 立项依据；(2) 研究内容与目标；(3) 拟采取的研究方案；(4) 创新点与可行性分析；(5) 年度计划与预期成果；(6) 工作基础与条件；(7) 经费预算；(8) Pre-Delivery Audit 表（L2-Standard）；(9) De-AI-Fier Gate 标记；(10) 评审视角自检表。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: innovation-reviewer, name: Innovation Reviewer}
+  - {id: scientific-paper-research, name: Scientific Paper Research}
+  - {id: literature-manager, name: Literature Manager}
+  - {id: critical-thinking, name: Critical Thinking}
+  - {id: diagram-architect, name: Diagram Architect}
+  - {id: doublecheck, name: Doublecheck}
+  - {id: figure-analyst, name: Figure Analyst}
+  - {id: figure-quality-reviewer, name: Figure Quality Reviewer}
+delivery_tier: producer-external
+revision: 21
+argument_hint: Provide fund type, topic, constraints, and existing materials (notes/data/figures/draft)

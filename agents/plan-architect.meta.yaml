@@ -1,0 +1,81 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `requirement_description` (str, required): 用户需求/目标描述（自然语言）
+  - `existing_context` (list[path], optional): 已存在的相关文档/代码路径
+  - `target_phases` (int, optional, default `auto`): 期望阶段数
+  - `acceptance_criteria_required` (bool, optional, default `true`): 是否每任务都需结构化 acceptance_criteria
+  - `output_path` (path, required): 计划输出路径（通常 `.github/plans/<name>.md`）
+  - `plan_schema_version` (enum, optional, default `1.1`): `1.0` | `1.1`
+  - `parallel_waves_hint` (bool, optional, default `true`): 是否标注 Execution Wave 以指导并行执行
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## 执行计划模板` 与 `## 文档修改计划模板` 章节生成完整计划文件，**必须**包含 v1.1 frontmatter（`plan_schema_version`、`phases[].tasks[].acceptance_criteria` 等）；最终回复以 `**Status**` 行开头（`COMPLETED` / `PARTIAL` / `BLOCKED`），后附计划文件路径、任务数统计、Execution Wave 列表、Error & Rescue Map 摘要，以及 `python -m agent_workflows.tools.validate_plan <path> --strict` 验证通过证据。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Explore (OpenCode built-in)
+  **When to delegate**: Quick read-only codebase search, file discovery, or dependency tracing.
+  **Required prompt fields**: N/A — Explore is a built-in subagent with no project-local agent contract file.
+  Expected return shape: File paths, search results, or code snippets relevant to the query.
+  
+  ### Critical Thinking
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/critical-thinking.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/critical-thinking.md` → `### Final Report 强制格式`.
+  
+  ### PM Coordinator
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/pm-coordinator.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/pm-coordinator.md` → `### Final Report 强制格式`.
+  
+  ### Plan Architect
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/plan-architect.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/plan-architect.md` → `### Final Report 强制格式`.
+  
+  ### Task Executor
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/task-executor.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/task-executor.md` → `### Final Report 强制格式`.
+  
+  ### Academic Writer
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/academic-writer.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/academic-writer.md` → `### Final Report 强制格式`.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## 执行计划模板` 与 `## 文档修改计划模板` 章节生成完整计划文件，**必须**包含 v1.1 frontmatter（`plan_schema_version`、`phases[].tasks[].acceptance_criteria` 等）；最终回复以 `**Status**` 行开头（`COMPLETED` / `PARTIAL` / `BLOCKED`），后附计划文件路径、任务数统计、Execution Wave 列表、Error & Rescue Map 摘要，以及 `python -m agent_workflows.tools.validate_plan <path> --strict` 验证通过证据。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: critical-thinking, name: Critical Thinking}
+  - {id: pm-coordinator, name: PM Coordinator}
+handoffs:
+  - {id: plan-architect, label: Refine this plan, name: Plan Architect, prompt: 'Read the plan file in mode=refine. Run the full review pipeline (R1→R1.5→R2→R2.8→R3) on the existing plan, fix all issues found, and output the refined plan with updated review log. Do NOT execute code — only improve the plan document.'}
+  - {id: task-executor, label: Execute this plan, name: Task Executor, prompt: 'Read the plan file and execute tasks sequentially, starting from the first uncompleted task.'}
+  - {id: academic-writer, label: Revise manuscript with this plan, name: Academic Writer, prompt: Read the Document Revision plan and execute text-revision tasks sequentially in Mode C.}
+delivery_tier: producer-internal
+revision: 28
+argument_hint: Describe the requirement, bug, or feature to plan for. Or use mode=refine to improve an existing plan before execution.

@@ -1,0 +1,97 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `materials_paths` (list[str], required): 待加工材料路径（草稿、笔记、数据表、图、文献集等）
+  - `target_artifact_type` (enum, required): `paper` | `report` | `proposal_draft` | `revision_plan`
+  - `target_format` (enum, required): `markdown` | `docx` | `latex` | `pdf`（非 markdown 触发委派 Format Engineer）
+  - `target_language` (enum, required): `zh` | `en` | `bilingual`
+  - `venue_or_template` (str, optional): 目标期刊/会议代号或模板名（如 `FED` / `NF` / `PST` / `FST`），触发期刊风格惯例
+  - `section_scope` (list[str], optional): 要撰写或修改的章节列表；省略则按 `target_artifact_type` 默认 IMRaD/Report 模板
+  - `style_constraints` (dict, optional): 字数上下限、图表数量、术语黑名单等
+  - `provenance_required` (bool, default true): 是否强制每条事实声明附带证据来源
+  - `mode_override` (enum, optional): `from_scratch` | `rewrite_polish` | `plan_driven_revision`；省略时 AW 按材料自检选择 Mode A/B/C
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  使用上文 `### Stage E: Packaging & Delivery` 定义的交付清单作为 Final Report 主体，必须包含 `**Status**` 字段（`COMPLETED` / `PARTIAL` / `BLOCKED`）、产物路径列表、Stage D 质量门通过证据（De-AI-Fier Gate 标记 + manuscript-lint 结果摘要）、未解决问题与下一步建议。当 `target_format` 非 markdown 时，Final Report 必须列出 Format Engineer 返回的最终产物路径。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  When delegating to sub-agents via `opencode task`, construct prompts using the field templates below. Field names mirror each sub-agent's `### 调用方需提供` contract.
+  
+  ### Critical Thinking
+  **When to delegate**: 方案选型前 / 阶段切换前 / 用户表现过度自信时
+  **Required prompt fields**:
+  - `assumption_list`: 当前 AW 草稿中的关键假设
+  - `current_decision`: 写作策略 / venue 选择 / 论证路径
+  - `requested_verdict_type`: full_socratic（默认）| red_flag_only
+  **Expected return shape**: see `.opencode/agent/critical-thinking.md` → `### Final Report 强制格式`
+  
+  ### Scientific Paper Research
+  **When to delegate**: Mode A/C 起稿前需补充文献
+  **Required prompt fields**: see SPR agent contract
+  **Expected return shape**: structured literature digest
+  
+  ### Diagram Architect
+  **When to delegate**: 草稿中需新增机理图 / 流程图
+  **Required prompt fields**:
+  - `diagram_intent`, `diagram_type`, `output_context: paper`, `target_venue`
+  **Expected return shape**: see `.opencode/agent/diagram-architect.md` → `### Final Report 强制格式`
+  
+  ### Figure Quality Reviewer
+  **When to delegate**: 投稿前 figure final pass
+  **Required prompt fields**:
+  - `figure_paths`, `manuscript_context`, `target_venue`, `document_type: paper`
+  **Expected return shape**: see `.opencode/agent/figure-quality-reviewer.md` → `## Output Template`
+  
+  ### Innovation Reviewer
+  **When to delegate**: 投稿前 novelty self-check
+  **Required prompt fields**:
+  - `document_path`, `document_type: paper`, `target_venue`, `review_depth: standard`
+  **Expected return shape**: see `.opencode/agent/innovation-reviewer.md` → `### Final Report 强制格式`
+  
+  ### Paper Reviewer
+  **When to delegate**: 投稿前 full review pass
+  **Required prompt fields**: see PR agent contract
+  **Expected return shape**: structured per-section findings
+  
+  ### Bilingual Polisher
+  **When to delegate**: 中英对照 / 投稿英文润色
+  **Required prompt fields**: source_path, target_language, terminology_baseline_path (optional)
+  **Expected return shape**: see `.opencode/agent/bilingual-polisher.md` → `## Final Report`
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  使用上文 `### Stage E: Packaging & Delivery` 定义的交付清单作为 Final Report 主体，必须包含 `**Status**` 字段（`COMPLETED` / `PARTIAL` / `BLOCKED`）、产物路径列表、Stage D 质量门通过证据（De-AI-Fier Gate 标记 + manuscript-lint 结果摘要）、未解决问题与下一步建议。当 `target_format` 非 markdown 时，Final Report 必须列出 Format Engineer 返回的最终产物路径。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: innovation-reviewer, name: Innovation Reviewer}
+  - {id: critical-thinking, name: Critical Thinking}
+  - {id: bilingual-polisher, name: Bilingual Polisher}
+  - {id: scientific-paper-research, name: Scientific Paper Research}
+  - {id: paper-reviewer, name: Paper Reviewer}
+  - {id: diagram-architect, name: Diagram Architect}
+  - {id: format-engineer, name: Format Engineer}
+  - {id: presentation-architect, name: Presentation Architect}
+  - {id: doublecheck, name: Doublecheck}
+  - {id: figure-analyst, name: Figure Analyst}
+  - {id: figure-quality-reviewer, name: Figure Quality Reviewer}
+handoffs:
+  - {id: patent-writer, label: Switch to Patent Writer, name: Patent Writer, prompt: User needs patent drafting instead of paper/report writing. Switch to Patent Writer with the current materials.}
+  - {id: format-engineer, label: Export to final format, name: Format Engineer, prompt: Export the finalized manuscript to the target format (docx/LaTeX/epub) with journal template and reference formatting.}
+delivery_tier: producer-external
+revision: 18
+argument_hint: Provide topic/materials/draft + target type (paper/report) + target format/language

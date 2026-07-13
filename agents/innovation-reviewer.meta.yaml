@@ -1,0 +1,80 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  Innovation Reviewer 作为被委派的 sub-agent，调用方仅看见 final message。
+  
+  ### 调用方需提供
+  - `document_path`: 待审稿件绝对路径（PDF/MD/DOCX）
+  - `document_type`: paper | patent | report
+  - `target_venue` (optional): 目标期刊/会议名称
+  - `domain` (optional): 子领域（如 "fusion blanket" / "tritium fuel cycle"），用于检索范围收敛
+  - `review_depth`: lite | standard | deep（默认 standard）
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  ```
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  *散文中已有的委派流程描述仅作参考；本段为字段权威定义。*
+  
+  When delegating to sub-agents via `opencode task`, construct prompts using the templates below.
+  
+  ### Critical Thinking
+  **When to delegate**: 五维评估出现高争议结论或边缘判定时，对 novelty/significance/feasibility 做反证审查。
+  **Required prompt fields** (see `.opencode/agent/critical-thinking.md` → `### 调用方需提供`):
+  - `question` (str, required)
+  - `context` (str, required)
+  - `stance` (enum, optional, default `challenge`): `challenge` | `steelman` | `balanced`
+  
+  ### Prior Art Semantic Reviewer (`mode=surface`)
+  **When to delegate**: Stage "Prior Art Sweep" 调研已发表论文/专利的表面对比信号。
+  **Required prompt fields** (see `.opencode/agent/prior-art-semantic-reviewer.md` → `### 调用方需提供`):
+  - `mode` (enum, required): `surface`
+  - `novelty_claims` (list[str], required)
+  - `search_keywords` (list[str], required)
+  - `time_window` (str, optional)
+  - `database_scope` (list[str], optional)
+  
+  ### Prior Art Semantic Reviewer
+  **When to delegate**: 表面扫描发现 top-k 高相似候选后，需要做语义层面的差异分析。
+  **Required prompt fields** (see `.opencode/agent/prior-art-semantic-reviewer.md` → `### 调用方需提供`):
+  - `mode` (enum, required): `semantic`
+  - `novelty_claims` (list[str], required)
+  - `candidate_prior_art` (list[dict], required): 含 doi/title/abstract/key_passages
+  - `comparison_depth` (enum, optional, default `methodological`)
+  
+  ### Scientific Paper Research
+  **When to delegate**: 需要更广的 venue 扫描（计算/学术资源型查阅）。
+  **Required prompt fields** (see `.opencode/agent/scientific-paper-research.md` → `### 调用方需提供`):
+  - `research_question` (str, required)
+  - `keywords` (list[str], required)
+  - `target_databases` (list[str], optional)
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  ```
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: critical-thinking, name: Critical Thinking}
+  - {id: format-engineer, name: Format Engineer}
+  - {id: prior-art-semantic-reviewer, name: Prior Art Semantic Reviewer}
+  - {id: figure-analyst, name: Figure Analyst}
+handoffs:
+  - {id: academic-writer, label: Write up novel findings, name: Academic Writer, prompt: The innovation review identified novel contributions. Draft or revise the manuscript to strengthen the novelty narrative based on the assessment report.}
+  - {id: patent-writer, label: File patent for novel method, name: Patent Writer, prompt: The innovation review confirmed novelty of a method/apparatus. Draft a patent application based on the assessment report and technical materials.}
+delivery_tier: specialist
+revision: 24
+argument_hint: Provide the paper/patent/report to review (file path, URL, or paste content)

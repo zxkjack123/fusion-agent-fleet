@@ -1,0 +1,42 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  PM Coordinator 是被其他 agent 委派的**执行型** subagent。调用方仅能看到你的 final message，因此**最终消息必须是结构化执行报告**，不能是对话性散文或"我将要做..."式声明。
+  
+  ### 调用方需提供
+  
+  - **操作意图**：要做什么（创建任务？查询日程？分析进度？）
+  - **关键参数**：标题、时间、负责人、项目代码等
+  - **上下文**：是否需要跨项目、是否关联其他条目
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  每次任务结束**必须**返回如下结构（保持精简，目标 ≤500 tokens）：
+  
+  ```
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  N/A — this agent is a leaf specialist with no outbound delegation.
+  All tool calls are direct MCP / built-in operations; no sub-agent orchestration required.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  每次任务结束**必须**返回如下结构（保持精简，目标 ≤500 tokens）：
+  
+  ```
+  
+delivery_tier: gateway
+revision: 7
+delegates: []

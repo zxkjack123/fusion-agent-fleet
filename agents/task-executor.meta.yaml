@@ -1,0 +1,90 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `plan_path` (path, required): Plan Architect 输出的执行计划文件路径
+  - `start_from` (str, optional, default `first_uncompleted`): 起始任务 id（如 `1.3`）或 `first_uncompleted`
+  - `stop_condition` (enum, optional, default `all_done`): `all_done` | `first_failure` | `token_budget`
+  - `commit_per_task` (bool, optional, default `true`): 每任务完成后是否 commit
+  - `token_budget_pct` (int, optional, default 90): 触发优雅中断的 token 占用阈值
+  - `skip_pre_commit_on_fail` (bool, optional, default `false`): 是否在 pre-commit 失败时跳过（默认禁止）
+  - `pm_sync_required` (bool, optional, default `false`): 是否要求 PM Coordinator 同步状态
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Mandatory Execution Summary` 与 `## 执行摘要` 章节输出最终报告，第一行 `**Status**` 字段使用 `COMPLETED` / `PARTIAL` / `FAILED` / `BLOCKED` / `HALTED` 之一，并包含已完成任务表、未完成/失败任务表、未 push commit 清单以及 Skill Crystallization Check 结果。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  Task Executor 在任务路由表（Step 1.4 Domain Detection）命中专业域时委派以下 sub-agent。调用时需提供的字段须与 callee 的 `### 调用方需提供` 定义一致。
+  
+  ### When to delegate to Critical Thinking
+  在 Step 3（测试失败根因反证）迫使委派；Step 5 bug 巡检开启反争检查时可选委派。Required prompt fields (see `.opencode/agent/critical-thinking.md` → `### 调用方需提供`): `question`、`context`、`stance=challenge`。
+  
+  ### When to delegate to Academic Writer
+  当任务由路由表 priority 5 命中（论文 / 报告 / 润色 / De-AI-Fier）时委派。Required prompt fields (see `.opencode/agent/academic-writer.md` → `### 调用方需提供`)：传递 `materials_paths`、`target_artifact_type` (paper/report)、`target_format`、`target_language`、`venue_or_template`、`section_scope`。
+  
+  ### When to delegate to Simulation Builder
+  当路由表 priority 2 命中（仿真建模 / 参数扫描 / input deck）时委派。Required prompt fields (see `.opencode/agent/simulation-builder.md` → `### 调用方需提供`)：传递 `target_code` (openmc/mcnp6/fispact-ii/dagmc/natf/tricys)、`geometry_intent`、`materials`、`source_definition`、`tally_requirements`、`output_workdir`。
+  
+  ### When to delegate to Simulation Analyst
+  当路由表 priority 3 命中（仿真后处理 / tally 解析 / TBR / DPA / SDR / 活化分析）时委派。Required prompt fields (see `.opencode/agent/simulation-analyst.md` → `### 调用方需提供`)：传递 `output_paths` (statepoint/outp/inventory 路径)、`source_code`、`target_metrics`、`preferred_plots`。
+  
+   ### When to delegate to Data Analyst
+   当路由表 priority 4 命中（数据分析 / 拟合 / 不确定度 / 绘图）时委派。Required prompt fields (see `.opencode/agent/data-analyst.md` → `### 调用方需提供`)：传递 `data_paths`、`target_metrics`、`analysis_type` (fit/uncertainty/CE/sweep)、`preferred_outputs`。
+
+   ### When to delegate to Deep Reviewer (auto-heal)
+   当 TE 停止条件 #2 触发 auto-heal 循环时委派。Required prompt fields (see `.opencode/agent/deep-reviewer.md` → `### 调用方需提供`): `target_files` (含 affected source files + auto-heal context file), `mode=deep`, `focus_areas=['error_diagnosis','code_fix']`, `severity_floor=error`。
+
+    ### When to delegate to Dify KB Manager (Findings Ledger)
+    当 TE Post-Completion Knowledge Ingestion 阶段写入 Findings Ledger 后委派，将 finding 摘要注入 `project-<project>-findings` KB。Required prompt fields: finding summary as Markdown (claim + evidence chain + reconciliation status).
+
+    ### When to delegate to Gate Runner (Pre/Post-Gate)
+    当 TE 委派 delivery_tier ∈ {orchestrator, producer-external, producer-internal} 的子 agent 时，先调用 gate-runner mode=pre（readiness + tool_budget check），子 agent 返回后调用 gate-runner mode=post（tier-based gate chain）。Refer to `instructions/gate-runner-contract.instructions.md` for full contract. Required prompt fields: mode=pre|post, target_agent_name, target_agent_tier (+ agent_output_text for mode=post).
+   
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Mandatory Execution Summary` 与 `## 执行摘要` 章节输出最终报告，第一行 `**Status**` 字段使用 `COMPLETED` / `PARTIAL` / `FAILED` / `BLOCKED` / `HALTED` 之一，并包含已完成任务表、未完成/失败任务表、未 push commit 清单以及 Skill Crystallization Check 结果。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: critical-thinking, name: Critical Thinking}
+  - {id: simulation-builder, name: Simulation Builder}
+  - {id: simulation-analyst, name: Simulation Analyst}
+  - {id: data-analyst, name: Data Analyst}
+  - {id: academic-writer, name: Academic Writer}
+  - {id: format-engineer, name: Format Engineer}
+  - {id: diagram-architect, name: Diagram Architect}
+  - {id: pm-coordinator, name: PM Coordinator}
+  - {id: deep-reviewer, name: Deep Reviewer}
+  - {id: scnet-hpc-coordinator, name: Scnet HPC Coordinator}
+  - {id: dify-kb-manager, name: Dify KB Manager}
+  - {id: plan-architect, name: Plan Architect}
+  - {id: gate-runner, name: Gate Runner}
+handoffs:
+  - {id: plan-architect, label: Improve plan after execution issues, name: Plan Architect, prompt: 'Read this plan file in mode=improve. Analyze the ## Execution Log section, identify root causes of all failures/blocks, and improve the plan to fix issues. Then save the improved plan back to the same file.'}
+delivery_tier: producer-internal
+revision: 30
+argument_hint: Path to execution plan, or 'continue' to resume from last completed task
+
+trace_contract: |
+  Task Executor writes span records to traces/trace.jsonl per instructions/tracing.instructions.md.
+  Sub-agents delegated to must return [TOKENS: in=N, out=N, reason=N] as the first line of response.
+
+delegation_contract_deep_reviewer: |
+  When TE enters auto-heal loop (stop condition #2), delegates to deep-reviewer with:
+  target_files: [<affected_source_files>, '.agent-runs/auto-heal-context-<task_id>.md']
+  mode: deep
+  focus_areas: ['error_diagnosis', 'code_fix']
+  severity_floor: error

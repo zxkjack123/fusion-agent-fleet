@@ -1,0 +1,45 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `standard_name` (str, required): 标准名称（如 `IEC 60068-2-1` / `GB 18871` / `IAEA SSG-53`）
+  - `standard_version` (str, optional): 版本/年份（默认最新公开版）
+  - `query_topic` (str, required): 检索主题（如 "thermal cycling test" / "shielding requirements"）
+  - `scope_clauses` (list[str], optional): 限定条款编号（如 `["§5.2", "§7.4"]`）
+  - `return_format` (enum, optional, default `clause_excerpt`): `clause_excerpt` | `summary` | `comparison_table`
+  - `cross_reference` (bool, optional, default `false`): 是否交叉引用同主题其他标准
+  - `language` (enum, optional, default `original`): `original` | `zh` | `en`
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Final Report` 章节输出，首行必须为 `**Status**`（`COMPLETED` / `PARTIAL` / `BLOCKED`），包含标准全称与版本、定位条款、原文摘录、解释/适用边界、引用合规警告、未覆盖问题与下一步建议。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Explore (OpenCode built-in)
+  **When to delegate**: Quick read-only codebase search, file discovery, or dependency tracing.
+  **Required prompt fields**: N/A — Explore is a built-in subagent with no project-local agent contract file.
+  Expected return shape: File paths, search results, or code snippets relevant to the query.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Final Report` 章节输出，首行必须为 `**Status**`（`COMPLETED` / `PARTIAL` / `BLOCKED`），包含标准全称与版本、定位条款、原文摘录、解释/适用边界、引用合规警告、未覆盖问题与下一步建议。
+  
+delegates:
+  - {id: explore, name: Explore}
+delivery_tier: specialist
+revision: 5
+argument_hint: Provide standard name/version, target clause topic, and compliance question

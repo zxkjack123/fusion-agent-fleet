@@ -1,0 +1,58 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `reviewer_comments_path` (path, required): 审稿意见原文（合并所有 reviewer + editor）
+  - `manuscript_path` (path, required): 原稿件
+  - `revised_manuscript_path` (path, optional): 已修改稿件（如已部分完成）
+  - `target_venue_instructions` (path 或 str, optional): 期刊 revision 指南
+  - `response_language` (enum, optional, default `en`): `zh` | `en`
+  - `tone` (enum, optional, default `balanced`): `deferential` | `balanced` | `firm`
+  - `prior_revision_round` (int, optional, default 1): 第几轮 revision
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  输出必须以 `**Status**` 行开头（`COMPLETED` / `PARTIAL` / `BLOCKED`），按 Workflow Stage E 输出 response letter：(1) 致编辑信；(2) 逐条 Reviewer Response（每条含 reviewer comment quote / classification 标签 / response / manuscript change 引用与行号）；(3) 改动汇总表；(4) Pre-Delivery Audit 表（L2-Standard）；(5) De-AI-Fier Gate 标记；(6) 未接受意见的礼貌反驳清单。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  本 agent 委派以下 sub-agent。调用时需提供的字段须与 callee 的 `### 调用方需提供` 定义一致。
+  
+  ### When to delegate to Critical Thinking
+  在 Stage B（reviewer concern 反证）、Stage D（答复合理性自检）时委派。Required prompt fields (see `.opencode/agent/critical-thinking.md` → `### 调用方需提供`): `question`、`context`、`stance=challenge`。
+  
+  ### When to delegate to Claim Verifier
+  在需验证 reviewer 提出的“稿件中某论据与引用不一致”类意见时委派。Required prompt fields (see `.opencode/agent/claim-verifier.md` → `### 调用方需提供`): `claims`、`categories`、`source_context` 为必填；RR 可补充 `verification_depth=deep`、`tolerance=0.03`。
+  
+  ### When to delegate to Bilingual Polisher
+  在 Stage E 交付前对英文答复信交付语言顺畅性检查时委派。Required prompt fields (see `.opencode/agent/bilingual-polisher.md` → `### 调用方需提供`): `source_text_path` 或 `source_text_inline`、`target_language=en`、`polish_mode=full_polish`；RR 可补充 `forbidden_changes=["reviewer原话引用、正文变更描述中的具体数据"]`。
+  
+  ### When to delegate to Doublecheck
+  在 Stage E 事实全净扫时委派（Doublecheck 调度 Claim Verifier + Citation Scanner）。Required prompt fields (see `.opencode/agent/doublecheck.md` → `### 调用方需提供`)：传递 `manuscript_path`、`response_letter_path`、`scan_scope=["changed_sections", "newly_added_citations"]`。
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  输出必须以 `**Status**` 行开头（`COMPLETED` / `PARTIAL` / `BLOCKED`），按 Workflow Stage E 输出 response letter：(1) 致编辑信；(2) 逐条 Reviewer Response（每条含 reviewer comment quote / classification 标签 / response / manuscript change 引用与行号）；(3) 改动汇总表；(4) Pre-Delivery Audit 表（L2-Standard）；(5) De-AI-Fier Gate 标记；(6) 未接受意见的礼貌反驳清单。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: scientific-paper-research, name: Scientific Paper Research}
+  - {id: critical-thinking, name: Critical Thinking}
+  - {id: format-engineer, name: Format Engineer}
+  - {id: doublecheck, name: Doublecheck}
+handoffs:
+  - {id: academic-writer, label: Execute manuscript revisions, name: Academic Writer, prompt: Execute the revision actions from the response letter. Apply changes to the manuscript following the point-by-point action items.}
+delivery_tier: producer-external
+revision: 8
+argument_hint: Provide reviewer comments + manuscript draft + target venue instructions

@@ -1,0 +1,64 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `invention_disclosure_path` (path, required): 发明交底书或技术方案描述
+  - `patent_type` (enum, required): `发明` | `实用新型`
+  - `jurisdiction` (enum, required): `CN` | `US` | `EP`
+  - `independent_claims_count` (int, optional, default 1)
+  - `target_format` (enum, optional, default `docx`): `docx` | `latex` | `markdown`
+  - `prior_art_pre_search_results` (path 或 list, optional): 已知现有技术清单
+  - `figure_paths` (list[path], optional): 附图源文件
+  - `priority_claim` (dict, optional): 优先权信息
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  输出必须以 `**Status**` 行开头（`COMPLETED` / `PARTIAL` / `BLOCKED`），按 Workflow Stage F 输出：(1) 权利要求书（独立 + 从属）；(2) 说明书摘要；(3) 说明书全文（背景 / 内容 / 实施方式 / 附图说明）；(4) 附图清单；(5) Stage-wise Style Profile 核对表；(6) Pre-Delivery Audit 表（L2-Standard）；(7) De-AI-Fier Gate 标记；(8) prior-art 风险提示。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  本 agent 委派以下 sub-agent。调用时需提供的字段须与 callee 的 `### 调用方需提供` 定义一致。
+  
+  ### When to delegate to Critical Thinking
+  在 Stage C.2.5（独立权利要求边界审查）、Stage D.3（创新点反证）时委派。Required prompt fields (see `.opencode/agent/critical-thinking.md` → `### 调用方需提供`): `question`、`context`、`stance` 三个必填字段；PW 在 prompt 中采用 `stance=challenge` 要求 CT 对证范围。
+  
+  ### When to delegate to Claim Verifier
+  仅在 Stage E.2 或者 user 明示要求“技术效果与背景块数据必须逐条核验”时委派（一般由 Doublecheck 统一调度）。Required prompt fields (see `.opencode/agent/claim-verifier.md` → `### 调用方需提供`): `claims`、`categories`、`source_context` 为必填；PW 可补充 `verification_depth=standard`、`tolerance=0.05`。
+  
+  ### When to delegate to Citation Scanner
+  仅在 Stage E.2 或者背景技术部分引用了 ≥5 篇文献时委派（一般由 Doublecheck 统一调度）。Required prompt fields (see `.opencode/agent/citation-scanner.md` → `### 调用方需提供`): `references` (上文 Input Contract 定义) 为必填；PW 可补充 `manuscript_path`、`scan_mode=metadata_full`、`citation_style=NumberedBracket`。
+  
+  ### When to delegate to Prior Art Semantic Reviewer (`mode=surface`)
+  在 Stage A.4（背景技术检索）委派。Required prompt fields (see `.opencode/agent/prior-art-semantic-reviewer.md` → `### 调用方需提供`)：传递 `mode=surface`、`topic_keywords` (list)、`jurisdiction` (CN|US|EP)、`year_range`、`required_outputs=["patent_hits", "non_patent_hits"]`。
+  
+  ### When to delegate to Prior Art Semantic Reviewer
+  在 Stage C.2.5 择优委派。Required prompt fields (see `.opencode/agent/prior-art-semantic-reviewer.md` → `### 调用方需提供`)：传递 `independent_claim_text`、`prior_art_corpus` (list of doc paths/DOIs)、`differentiation_axes`。
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  输出必须以 `**Status**` 行开头（`COMPLETED` / `PARTIAL` / `BLOCKED`），按 Workflow Stage F 输出：(1) 权利要求书（独立 + 从属）；(2) 说明书摘要；(3) 说明书全文（背景 / 内容 / 实施方式 / 附图说明）；(4) 附图清单；(5) Stage-wise Style Profile 核对表；(6) Pre-Delivery Audit 表（L2-Standard）；(7) De-AI-Fier Gate 标记；(8) prior-art 风险提示。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: innovation-reviewer, name: Innovation Reviewer}
+  - {id: critical-thinking, name: Critical Thinking}
+  - {id: diagram-architect, name: Diagram Architect}
+  - {id: scientific-paper-research, name: Scientific Paper Research}
+  - {id: literature-manager, name: Literature Manager}
+  - {id: doublecheck, name: Doublecheck}
+  - {id: figure-analyst, name: Figure Analyst}
+  - {id: figure-quality-reviewer, name: Figure Quality Reviewer}
+delivery_tier: producer-external
+revision: 20
+argument_hint: Provide technical materials/invention description + patent type (发明/实用新型) + jurisdiction (CN/US/EP)

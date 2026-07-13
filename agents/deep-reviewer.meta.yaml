@@ -1,0 +1,41 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  
+  参见上文 `## Input Contract`。要求字段（与 Repo Reviewer Pattern A 兼容）：
+  - `target_files` (list[path], required, 对齐 `target_modules`)
+  - `mode` (enum, optional, default `deep`): `systemic` | `deep`
+  - `repo_path` / `scope_paths` / `scan_patterns` (required for `mode=systemic`)
+  - `focus_areas` (list[str], optional, default `["business_logic","race_condition","boundary_check","input_validation"]`)
+  - `severity_floor` (enum, optional, default `warning`): `info` | `warning` | `error`
+  - `max_modules` (int, optional): 限制审查模块数量
+  - `language_hint` (enum, optional, default `auto`)
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Output Format` 与 `## Deep Review Results` 模板输出。首行必须为 `**Status**`（`COMPLETED` / `PARTIAL` / `BLOCKED`），包含 per-module findings、cross-module interaction analysis、CT-verified critical findings、severity 分布与修复优先级。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  N/A — this agent is a leaf specialist with no outbound delegation.
+  All tool calls are direct MCP / built-in operations; no sub-agent orchestration required.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Output Format` 与 `## Deep Review Results` 模板输出。首行必须为 `**Status**`（`COMPLETED` / `PARTIAL` / `BLOCKED`），包含 per-module findings、cross-module interaction analysis、CT-verified critical findings、severity 分布与修复优先级。
+  
+delivery_tier: sub-only
+revision: 7
+delegates: []

@@ -1,0 +1,60 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `job_posting_text` (str, required if no url): 完整职位描述
+  - `job_url` (str, required if no text): Upwork 职位链接
+  - `target_budget` (str, optional): 报价/预算范围
+  - `target_duration` (str, optional): 项目预期时长
+  - `relevant_portfolio` (list[path], optional): 相关作品/经历文件
+  - `tone` (enum, optional, default `professional`): `professional` | `friendly` | `assertive`
+  - `language` (enum, optional, default `en`): `en` | `zh`
+  - `proposal_max_words` (int, optional, default `300`)
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Output Format Rules` 与 `## Proposal Structure (Plain Text)` 输出。首行必须为 `**Status**`（`COMPLETED` / `PARTIAL` / `BLOCKED`），包含纯文本 proposal、报价与工期建议、相关作品引用、Scope Guard 结果（接单/婉拒）、Pre-Delivery Check 标记。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Explore (OpenCode built-in)
+  **When to delegate**: Quick read-only codebase search, file discovery, or dependency tracing.
+  **Required prompt fields**: N/A — Explore is a built-in subagent with no project-local agent contract file.
+  Expected return shape: File paths, search results, or code snippets relevant to the query.
+  
+  ### Format Engineer
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/format-engineer.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/format-engineer.md` → `### Final Report 强制格式`.
+  
+  ### PM Coordinator
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/pm-coordinator.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/pm-coordinator.md` → `### Final Report 强制格式`.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Output Format Rules` 与 `## Proposal Structure (Plain Text)` 输出。首行必须为 `**Status**`（`COMPLETED` / `PARTIAL` / `BLOCKED`），包含纯文本 proposal、报价与工期建议、相关作品引用、Scope Guard 结果（接单/婉拒）、Pre-Delivery Check 标记。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: format-engineer, name: Format Engineer}
+  - {id: pm-coordinator, name: PM Coordinator}
+delivery_tier: producer-external
+revision: 10
+argument_hint: Paste job posting text, provide Upwork URL, or describe the job requirements

@@ -1,0 +1,69 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `target_code` (enum, required): `openmc` | `mcnp6` | `fispact-ii` | `dagmc` | `natf` | `tricys`
+  - `geometry_intent` (str | path, required): 几何描述（自然语言）或 CAD/h5m 路径
+  - `materials` (list[dict] | path, required): 材料清单（核素、密度、温度）或 materials.xml 路径
+  - `source_definition` (dict, required): 粒子类型、能量/角分布、空间分布、强度
+  - `tally_requirements` (list[dict], required): 关心物理量（TBR / DPA / flux / dose / activation 等）+ 网格/区域定义
+  - `output_workdir` (path, required): 输入卡与中间产物目录
+  - `parametric_sweep` (dict, optional): 参数化扫描设计（变量、网格、模板）
+  - `hpc_target` (dict, optional): 是否需要 HPC 提交、目标集群偏好；触发 SB 内部委派 Scnet HPC Coordinator
+  - `validation_baseline` (path 或 dict, optional): 用于 Stage E 预飞行对照的参考结果
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `### Stage G: Delivery` 输出交付清单，必须包含 `**Status**` 字段（`COMPLETED` / `PARTIAL` / `BLOCKED`）、输入卡路径列表、Stage X 验证门通过证据、Stage F Pre-Delivery Audit 表格（L2-Standard 起步，L3-Critical 触发条件参见 audit instruction）、以及（如有）HPC 提交返回的 task_id 与状态。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Explore (OpenCode built-in)
+  **When to delegate**: Quick read-only codebase search, file discovery, or dependency tracing.
+  **Required prompt fields**: N/A — Explore is a built-in subagent with no project-local agent contract file.
+  Expected return shape: File paths, search results, or code snippets relevant to the query.
+  
+  ### Critical Thinking
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/critical-thinking.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/critical-thinking.md` → `### Final Report 强制格式`.
+  
+  ### Scnet HPC Coordinator
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/scnet-hpc-coordinator.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/scnet-hpc-coordinator.md` → `### Final Report 强制格式`.
+  
+  ### Simulation Analyst
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/simulation-analyst.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/simulation-analyst.md` → `### Final Report 强制格式`.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `### Stage G: Delivery` 输出交付清单，必须包含 `**Status**` 字段（`COMPLETED` / `PARTIAL` / `BLOCKED`）、输入卡路径列表、Stage X 验证门通过证据、Stage F Pre-Delivery Audit 表格（L2-Standard 起步，L3-Critical 触发条件参见 audit instruction）、以及（如有）HPC 提交返回的 task_id 与状态。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: critical-thinking, name: Critical Thinking}
+  - {id: scnet-hpc-coordinator, name: Scnet HPC Coordinator}
+handoffs:
+  - {id: simulation-analyst, label: Post-process simulation results, name: Simulation Analyst, prompt: Post-process the simulation outputs from this run. Output paths and key metrics are listed above.}
+delivery_tier: producer-internal
+revision: 13
+argument_hint: Provide target code (OpenMC/MCNP6/FISPACT-II/DAGMC/natf/tricys), geometry intent, material definitions, and tally/source requirements

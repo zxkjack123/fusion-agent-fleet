@@ -1,0 +1,52 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  上文 `## Input Contract` section 定义了完整输入 schema。附加可选字段：
+  
+  - `manuscript_path` (optional): 稿件路径，用于从正文提取 in-text citation
+  - `bib_path` (optional): BibTeX/RIS 路径，触发 Stage –1 citation-lint 检查
+  - `scan_mode`: doi_only（仅 Stage ①） | metadata_full（①–③） | full（①–⑤ 全部）（默认 metadata_full）
+  - `citation_style` (optional): IEEE | APA | NumberedBracket | AuthorYear（默认自动检测）
+  - `severity_floor` (optional): info | warning | error（默认 warning）
+  - `kb_id` (optional): Dify KB 指针，覆盖 Stage ⓪ 默认检索目标
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  使用上文 `## Output Format` + `## Citation Scan Results` section 定义的结构化输出，并在首行加：
+  
+  ```
+  **Status**: COMPLETED | PARTIAL | FAILED | BLOCKED
+  **Citations scanned**: N (valid=x, format_issue=y, not_found=z, refuted=w)
+  **Stages run**: [–1, ⓪, ①, ...]
+  ```
+  
+  Status 语义：COMPLETED = scan_mode 范围全部扫完；PARTIAL = 某阶段因 API 不可达被跳过（列入 stages_skipped）；FAILED = 输入 references 缺失或格式错误；BLOCKED = 需 caller 补充 bib_path 或选择 citation_style。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  N/A — this agent is a leaf specialist with no outbound delegation.
+  All tool calls are direct MCP / built-in operations; no sub-agent orchestration required.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  使用上文 `## Output Format` + `## Citation Scan Results` section 定义的结构化输出，并在首行加：
+  
+  ```
+  **Status**: COMPLETED | PARTIAL | FAILED | BLOCKED
+  **Citations scanned**: N (valid=x, format_issue=y, not_found=z, refuted=w)
+  **Stages run**: [–1, ⓪, ①, ...]
+  ```
+  
+  Status 语义：COMPLETED = scan_mode 范围全部扫完；PARTIAL = 某阶段因 API 不可达被跳过（列入 stages_skipped）；FAILED = 输入 references 缺失或格式错误；BLOCKED = 需 caller 补充 bib_path 或选择 citation_style。
+  
+delivery_tier: sub-only
+revision: 7
+delegates: []

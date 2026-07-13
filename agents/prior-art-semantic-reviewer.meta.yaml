@@ -1,0 +1,46 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `manuscript_claims` (list[str], required): 当前稿件/专利的 claim 摘要列表（每行一条）
+  - `mode` (enum, optional, default `semantic`): `surface` | `semantic`
+  - `priority_prior_art` (list[dict], required for `mode=semantic`): 由 `mode=surface` 输出或其它检索源提供的优先候选清单，每项含 `title`/`authors`/`year`/`venue`/`doi_or_url`/`relevance`
+  - `domain_context` (str, required): 技术领域简述，用于深读判别基线
+  - `focus_axes` (list[str], optional, default `["methodology_overlap", "contribution_diff", "non_obviousness"]`): 比较轴
+  - `paywall_policy` (enum, optional, default `abstract_only`): `abstract_only` | `skip` | `flag_user`，控制无法深读时的行为
+  - `verdict_threshold` (dict, optional): 自定义 `🟢/🟡/🔴` 判定阈值
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Output Format` + `## Per-Claim Deep Review` 输出语义对比报告，必须包含 `**Status**` 字段（`COMPLETED` / `PARTIAL` 含跳过原因）、每条 claim 的 verdict（🟢 Novel / 🟡 Incremental / 🔴 Prior Art Exists）与可追溯的技术差异证据，以及 `## Summary` 段落汇总整体新颖性结论。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Critical Thinking
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/critical-thinking.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/critical-thinking.md` → `### Final Report 强制格式`.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Output Format` + `## Per-Claim Deep Review` 输出语义对比报告，必须包含 `**Status**` 字段（`COMPLETED` / `PARTIAL` 含跳过原因）、每条 claim 的 verdict（🟢 Novel / 🟡 Incremental / 🔴 Prior Art Exists）与可追溯的技术差异证据，以及 `## Summary` 段落汇总整体新颖性结论。
+  
+delegates:
+  - {id: critical-thinking, name: Critical Thinking}
+delivery_tier: sub-only
+revision: 7
+argument_hint: Provide manuscript claims + priority candidate prior art list (from Surface Scanner) + domain context → deep semantic comparison report.

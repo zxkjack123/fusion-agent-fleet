@@ -1,0 +1,52 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `diagram_intent`: 自然语言描述（必填）；或已有 DSL 文本（可选）
+  - `diagram_type`: flowchart | schematic | architecture | mechanism | apparatus | concept_map
+  - `output_context`: paper | report | patent | slides | general
+  - `target_venue` (optional): 目标期刊名（触发 `apply_journal_preset`）
+  - `output_formats`: 默认 ["png", "pdf"]；可指定 ["svg"] 等
+  - `iteration_budget`: 最大迭代轮数（默认 3）
+  - `language`: en | zh（默认 en）
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  ```
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Explore (OpenCode built-in)
+  **When to delegate**: Quick read-only codebase search, file discovery, or dependency tracing.
+  **Required prompt fields**: N/A — Explore is a built-in subagent with no project-local agent contract file.
+  Expected return shape: File paths, search results, or code snippets relevant to the query.
+  
+  ### Critical Thinking
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/critical-thinking.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/critical-thinking.md` → `### Final Report 强制格式`.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  ```
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: critical-thinking, name: Critical Thinking}
+delivery_tier: specialist
+revision: 13
+argument_hint: Provide diagram description/sketch + target context (paper/patent/report/slides) + target journal (optional)

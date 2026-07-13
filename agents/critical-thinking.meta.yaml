@@ -1,0 +1,84 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `assumption_list`: 待挑战的关键假设列表（≥1 条；散文亦可）
+  - `current_decision`: 当前倾向的决策 / 路径 / 方法选择
+  - `evidence_summary` (optional): 支撑该决策的现有证据要点
+  - `requested_verdict_type`: red_flag_only | full_socratic | scenario_oracle | depth_classification（默认 full_socratic）
+  - `domain_context` (optional): 领域（如 "fusion blanket activation"），触发 §Domain-Specific Questions
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  When called as a subagent, your final message **MUST** be a structured verdict. This is an internal communication format, not a user deliverable — it does not conflict with CT's "no deliverables" policy.
+  
+  ```markdown
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Explore (OpenCode built-in)
+  **When to delegate**: Quick read-only codebase search, file discovery, or dependency tracing.
+  **Required prompt fields**: N/A — Explore is a built-in subagent with no project-local agent contract file.
+  Expected return shape: File paths, search results, or code snippets relevant to the query.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  When called as a subagent, your final message **MUST** be a structured verdict. This is an internal communication format, not a user deliverable — it does not conflict with CT's "no deliverables" policy.
+  
+  ```markdown
+  ## CT Verdict
+  
+  **Status**: COMPLETED | PARTIAL | FAILED | BLOCKED
+  **Verdict**: 🟢 GREEN (approach sound) | 🟡 YELLOW (concerns identified) | 🔴 RED (critical flaw)
+  **Confidence**: HIGH | MEDIUM | LOW
+  **Depth**: L1 Surface | L2 Mechanism | L3 Structural | L4 Paradigm (see Diagnostic Classification)
+  
+  ### Key Concerns
+  - Concern 1: [specific assumption or reasoning gap]
+  - Concern 2: [alternative explanation not ruled out]
+  
+  ### Convergent Tensions (Red Council mode only)
+  - Convergence: [where ≥3 members agreed]
+  - Core Tension: [central unresolved disagreement]
+  - Blind Spot: [what no member addressed]
+  
+  ### Fallback on Uncertainty
+  - If confidence is LOW: "Cannot rule out [alternative]. Recommend [specific verification step]."
+  - If verdict relies on unavailable data: "Assumes [X]. If [X] is false, verdict changes to [Y]."
+  - If CT is unable to complete review: Status=FAILED, state reason (timeout / insufficient input / tool error)
+  
+  ### Recommendation
+  - [One actionable sentence for the calling agent]
+  ```
+  
+  ### Status Semantics
+  
+  | Status | Meaning |
+  |--------|---------|
+  | COMPLETED | Full review executed; all phases completed |
+  | PARTIAL | Some phases skipped or incomplete with explicit reason |
+  | FAILED | Cannot produce verdict (missing input, tool failure, timeout) |
+  | BLOCKED | Need clarification from caller before proceeding |
+  
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Explore (OpenCode built-in)
+  **When to delegate**: Quick read-only codebase search, file discovery, or dependency tracing.
+  **Required prompt fields**: N/A — Explore is a built-in subagent with no project-local agent contract file.
+  Expected return shape: File paths, search results, or code snippets relevant to the query.
+  
+delegates:
+  - {id: explore, name: Explore}
+delivery_tier: utility
+revision: 6

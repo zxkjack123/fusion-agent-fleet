@@ -1,0 +1,47 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `source_path`: 输入文件路径（必填）
+  - `source_format` (optional): md | docx | latex | epub | quarto（默认从扩展名推断）
+  - `target_format`: md | docx | latex | epub | pdf（必填）
+  - `venue_template` (optional): 模板名（如 "NF" / "FED" / "IEEE"），触发 `template_install`/`template_validate`
+  - `reference_doc` (optional): docx 输出时作为样式参考的 reference.docx 路径
+  - `pipeline_options` (optional): {`lint_first`: bool, `refs_check`: bool, `autofix`: bool, `epub_qa`: bool, `wps_repair`: bool}；默认根据 source/target 自动选择安全的最小集
+  - `bib_path` (optional): BibTeX 路径，启用 refs_check
+  - `output_path` (optional): 目标输出路径；省略时由 FE 选择
+  - `in_place` (optional): bool，默认 false；true 时在 `docx_normalize`/`wps_fix` 前自动备份
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  使用上文 `## Final Report` + `## FE Final Report` section 定义的结构化输出（含 Status 字段、输出路径、所调用的 formatforge 工具链、温和列表、警告）。Status 语义：COMPLETED = target_format 产出生成且所有 pipeline_options 负载完成；PARTIAL = 产出生成但 lint/refs_check 产生警告未修复；FAILED = formatforge 工具返回错误或 doctor 检查不通过；BLOCKED = 需 caller 提供 venue_template 或决定 wps_repair 策略。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Explore (OpenCode built-in)
+  **When to delegate**: Quick read-only codebase search, file discovery, or dependency tracing.
+  **Required prompt fields**: N/A — Explore is a built-in subagent with no project-local agent contract file.
+  Expected return shape: File paths, search results, or code snippets relevant to the query.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  使用上文 `## Final Report` + `## FE Final Report` section 定义的结构化输出（含 Status 字段、输出路径、所调用的 formatforge 工具链、温和列表、警告）。Status 语义：COMPLETED = target_format 产出生成且所有 pipeline_options 负载完成；PARTIAL = 产出生成但 lint/refs_check 产生警告未修复；FAILED = formatforge 工具返回错误或 doctor 检查不通过；BLOCKED = 需 caller 提供 venue_template 或决定 wps_repair 策略。
+  
+delegates:
+  - {id: explore, name: Explore}
+delivery_tier: specialist
+revision: 8
+argument_hint: Provide source file(s), target format/template, and any venue/style constraints

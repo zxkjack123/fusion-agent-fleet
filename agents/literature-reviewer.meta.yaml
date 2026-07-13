@@ -1,0 +1,82 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `review_topic` (str, required): 综述主题/研究问题
+  - `time_window` (dict, required): `from_year` + `to_year`
+  - `search_scope` (list[str], required): 检索源（databases + Dify KBs，例如 `["WoS", "Scopus", "kb:fusion_blanket"]`）
+  - `inclusion_criteria` (list[str], required): 纳入标准（语言、研究类型、关键词等）
+  - `exclusion_criteria` (list[str], required): 排除标准
+  - `target_deliverables` (list[str], optional, default `["prisma_diagram","evidence_table","gap_analysis"]`)
+  - `min_citations` (int, optional): 引用次数阈值
+  - `output_language` (enum, optional, default `en`): `zh` | `en` | `bilingual`
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  输出必须以 `**Status**` 行开头（`COMPLETED` / `PARTIAL` / `BLOCKED`），按 Workflow Stage F 输出：(1) PRISMA 流程图（数值 + 路径）；(2) 文献证据表（每条含 DOI / 关键发现 / 方法 / 局限）；(3) Gap Analysis；(4) 主题演化时间线；(5) Pre-Delivery Audit 表（L2-Standard）；(6) De-AI-Fier Gate 标记；(7) 引文清单（bib 格式）。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  *散文中已有的委派流程描述仅作参考；本段为字段权威定义。*
+  
+  When delegating to sub-agents via `opencode task`, construct prompts using the templates below.
+  
+  ### Scientific Paper Research
+  **When to delegate**: 深度文献检索（databases scanning, paper retrieval）。
+  **Required prompt fields** (see `.opencode/agent/scientific-paper-research.md` → `### 调用方需提供`):
+  - `research_question` (str, required)
+  - `keywords` (list[str], required)
+  - `target_databases` (list[str], optional)
+  - `time_window` (str, optional)
+  
+  ### Literature Manager
+  **When to delegate**: 文献元数据管理、Zotero 入库、PDF 附件、去重审计。
+  **Required prompt fields** (see `.opencode/agent/literature-manager.md` → `### 调用方需提供`):
+  - `operation_mode` (enum, required): `import_by_doi` | `attach_pdfs` | `dedup_audit` | `export_bib` | `metadata_repair`
+  - `doi_list` (list[str], optional)
+  - `pdf_directory` (path, optional)
+  - `target_collection` (str, optional)
+  
+  ### Format Engineer
+  **When to delegate**: 综述稿件最终格式化、参考文献校验、模板套用、跨格式导出。
+  **Required prompt fields** (see `.opencode/agent/format-engineer.md` → `### 调用方需提供`):
+  - `source_path` (path, required)
+  - `target_format` (enum, required): `docx` | `latex` | `pdf` | `epub`
+  - `template_path` (path, optional)
+  - `bib_path` (path, optional)
+  
+  ### Citation Scanner
+  **When to delegate**: 综述稿件引用 ↔ 参考文献交叉核对，phantom/uncited 排查。
+  **Required prompt fields** (see `.opencode/agent/citation-scanner.md` → `### 调用方需提供`):
+  - `manuscript_path` (path, required)
+  - `bib_path` (path, required)
+  - `citation_style` (enum, optional, default `auto`)
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  输出必须以 `**Status**` 行开头（`COMPLETED` / `PARTIAL` / `BLOCKED`），按 Workflow Stage F 输出：(1) PRISMA 流程图（数值 + 路径）；(2) 文献证据表（每条含 DOI / 关键发现 / 方法 / 局限）；(3) Gap Analysis；(4) 主题演化时间线；(5) Pre-Delivery Audit 表（L2-Standard）；(6) De-AI-Fier Gate 标记；(7) 引文清单（bib 格式）。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: scientific-paper-research, name: Scientific Paper Research}
+  - {id: critical-thinking, name: Critical Thinking}
+  - {id: format-engineer, name: Format Engineer}
+  - {id: literature-manager, name: Literature Manager}
+  - {id: figure-analyst, name: Figure Analyst}
+  - {id: figure-quality-reviewer, name: Figure Quality Reviewer}
+handoffs:
+  - {id: academic-writer, label: Draft review manuscript, name: Academic Writer, prompt: 'Draft a review paper based on the systematic review deliverables from this session (gap matrix, synthesis text, included-studies table).'}
+delivery_tier: producer-external
+revision: 11
+argument_hint: Provide review topic, time window, search scope/databases, and target deliverables

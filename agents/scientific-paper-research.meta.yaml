@@ -1,0 +1,73 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `research_question`: 自然语言研究问题或检索意图（必填）
+  - `search_scope` (optional): 数据库限定（如 ["semantic-scholar", "zotero"]）+ 年份范围（如 "2018-2026"）+ 语言范围
+  - `depth`: quick（≤10 篇） | medium（10–30 篇） | thorough（30+ 篇含 gap analysis）（默认 medium）
+  - `required_outputs`: 列表，可选 ["summary", "citation_list", "gap_analysis", "zotero_ingest"]（默认 ["summary", "citation_list"]）
+  - `existing_context` (optional): 调用方已读文献列表（DOI 或 title），用于去重
+  - `relevance_threshold` (optional): high | medium | low（默认 high；决定 Zotero 自动入库阈值）
+  - `target_collection` (optional): Zotero 目标 collection（如委派 ingest 任务）
+  - `topic_tag` (optional): 自定义 tag；省略时使用 `AI-assisted:scientific-paper-research`
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  使用上文 `## Literature Search Results` section 定义的结构化输出，并在文首附 Status 行：
+  
+  ```
+  **Status**: COMPLETED | PARTIAL | FAILED | BLOCKED
+  **Search scope used**: [databases queried, year range, query strings]
+  **Papers reviewed**: N (HIGH=x, MED=y, LOW=z)
+  **Zotero ingestion**: [auto-ingested DOI count + Literature Manager delegation summary, 或 "skipped — required_outputs 未含 zotero_ingest"]
+  ```
+  
+  Status 语义：COMPLETED = 所有 required_outputs 已产出；PARTIAL = 部分数据库不可达或检索预算耗尽；FAILED = 无法返回任何结果（API 全部失败/输入错误）；BLOCKED = 需 caller 澄清 search_scope 或 relevance_threshold。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Explore (OpenCode built-in)
+  **When to delegate**: Quick read-only codebase search, file discovery, or dependency tracing.
+  **Required prompt fields**: N/A — Explore is a built-in subagent with no project-local agent contract file.
+  Expected return shape: File paths, search results, or code snippets relevant to the query.
+  
+  ### Literature Manager
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/literature-manager.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/literature-manager.md` → `### Final Report 强制格式`.
+  
+  ### Figure Analyst
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/figure-analyst.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/figure-analyst.md` → `### Final Report 强制格式`.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  使用上文 `## Literature Search Results` section 定义的结构化输出，并在文首附 Status 行：
+  
+  ```
+  **Status**: COMPLETED | PARTIAL | FAILED | BLOCKED
+  **Search scope used**: [databases queried, year range, query strings]
+  **Papers reviewed**: N (HIGH=x, MED=y, LOW=z)
+  **Zotero ingestion**: [auto-ingested DOI count + Literature Manager delegation summary, 或 "skipped — required_outputs 未含 zotero_ingest"]
+  ```
+  
+  Status 语义：COMPLETED = 所有 required_outputs 已产出；PARTIAL = 部分数据库不可达或检索预算耗尽；FAILED = 无法返回任何结果（API 全部失败/输入错误）；BLOCKED = 需 caller 澄清 search_scope 或 relevance_threshold。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: literature-manager, name: Literature Manager}
+  - {id: figure-analyst, name: Figure Analyst}
+delivery_tier: specialist
+revision: 10

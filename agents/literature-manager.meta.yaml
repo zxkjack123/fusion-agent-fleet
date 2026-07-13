@@ -1,0 +1,45 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `operation_mode` (enum, required): `import_by_doi` | `attach_pdfs` | `dedup_audit` | `export_bib` | `metadata_repair`
+  - `doi_list` (list[str], optional): import 模式必填
+  - `pdf_directory` (path, optional): attach 模式必填
+  - `target_collection` (str, optional): Zotero collection 名称
+  - `auto_attach_oa_pdf` (bool, optional, default `true`): 自动下载 OA PDF
+  - `export_format` (enum, optional, default `bibtex`): `bibtex` | `csl-json` | `ris`
+  - `export_path` (path, optional)
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Final Report` 章节输出，首行必须为 `**Status**`（`COMPLETED` / `PARTIAL` / `BLOCKED`），包含操作汇总、成功/失败条目数、新增/更新文献清单（DOI + key）、未解决问题与建议下一步。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Explore (OpenCode built-in)
+  **When to delegate**: Quick read-only codebase search, file discovery, or dependency tracing.
+  **Required prompt fields**: N/A — Explore is a built-in subagent with no project-local agent contract file.
+  Expected return shape: File paths, search results, or code snippets relevant to the query.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Final Report` 章节输出，首行必须为 `**Status**`（`COMPLETED` / `PARTIAL` / `BLOCKED`），包含操作汇总、成功/失败条目数、新增/更新文献清单（DOI + key）、未解决问题与建议下一步。
+  
+delegates:
+  - {id: explore, name: Explore}
+delivery_tier: specialist
+revision: 5
+argument_hint: Provide DOI list / PDF directory / collection name and operation mode

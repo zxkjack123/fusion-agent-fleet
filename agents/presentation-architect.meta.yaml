@@ -1,0 +1,70 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `materials_paths` (list[path], required): 演讲材料（论文/报告/数据/图表）
+  - `presentation_type` (enum, required): `conference` | `poster` | `defense` | `group_meeting` | `invited_talk`
+  - `audience_level` (enum, required): `expert` | `peer` | `student` | `mixed`
+  - `time_minutes` (int, required): 演讲时长
+  - `slide_template` (path, optional): pptx 母版/模板路径
+  - `figure_paths` (list[path], optional): 已就绪的图表文件
+  - `output_format` (enum, optional, default `pptx`): `pptx` | `beamer_pdf`
+  - `language` (enum, optional, default `en`): `zh` | `en` | `bilingual`
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  输出必须以 `**Status**` 行开头（`COMPLETED` / `PARTIAL` / `BLOCKED`），按 Workflow Stage E 输出：(1) slide deck 路径；(2) Frame-by-frame 大纲；(3) 时长预算表；(4) 图表清单与来源；(5) Pre-Delivery Audit 表（L1-Lite）；(6) De-AI-Fier Gate 标记；(7) 已知限制（ai-ppt 工具限制 / 字体降级等）。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  *散文中已有的委派流程描述仅作参考；本段为字段权威定义。*
+  
+  When delegating to sub-agents via `opencode task`, construct prompts using the templates below.
+  
+  ### Diagram Architect
+  **When to delegate**: 演讲中需要 publication-grade TikZ 流程图/示意图/架构图。
+  **Required prompt fields** (see `.opencode/agent/diagram-architect.md` → `### 调用方需提供`):
+  - `diagram_description` (str, required)
+  - `target_context` (enum, required): `paper` | `patent` | `report` | `slides`
+  - `target_journal` (str, optional)
+  - `sketch_path` (path, optional)
+  
+  ### Figure Quality Reviewer
+  **When to delegate**: 待用图表（自制或来源）需要做发表适配性、字号、可读性审查。
+  **Required prompt fields** (see `.opencode/agent/figure-quality-reviewer.md` → `### 调用方需提供`):
+  - `figure_paths` (list[path], required)
+  - `target_venue` (enum, optional): `slides` | `journal` | `conference` | `poster`
+  - `min_dpi` (int, optional, default `300`)
+  - `color_blind_safe` (bool, optional, default `true`)
+  
+  ### Format Engineer
+  **When to delegate**: 最终 pptx/beamer 输出的模板套用、字体修复、跨平台一致性校验。
+  **Required prompt fields** (see `.opencode/agent/format-engineer.md` → `### 调用方需提供`):
+  - `source_path` (path, required)
+  - `target_format` (enum, required): `pptx` | `beamer_pdf`
+  - `template_path` (path, optional)
+  - `font_fallback` (list[str], optional)
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  输出必须以 `**Status**` 行开头（`COMPLETED` / `PARTIAL` / `BLOCKED`），按 Workflow Stage E 输出：(1) slide deck 路径；(2) Frame-by-frame 大纲；(3) 时长预算表；(4) 图表清单与来源；(5) Pre-Delivery Audit 表（L1-Lite）；(6) De-AI-Fier Gate 标记；(7) 已知限制（ai-ppt 工具限制 / 字体降级等）。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: data-analyst, name: Data Analyst}
+  - {id: critical-thinking, name: Critical Thinking}
+  - {id: diagram-architect, name: Diagram Architect}
+delivery_tier: producer-external
+revision: 15
+argument_hint: Provide source materials, presentation type, target audience, and time/space constraints

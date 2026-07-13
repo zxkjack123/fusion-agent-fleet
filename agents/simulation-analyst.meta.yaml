@@ -1,0 +1,74 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `output_paths` (list[path], required): 仿真输出位置（statepoint.h5、outp、mctal、tally.out、inventory*.json、phtn_src、SDR 文件等）
+  - `source_code` (enum, required): `openmc` | `mcnp6` | `fispact-ii` | `dagmc` | `natf` | `tricys`
+  - `target_metrics` (list[str], required): 关心物理量（如 `TBR`, `DPA`, `SDR`, `keff`, `dose_rate`, `flux_spectrum`, `activation_inventory`）
+  - `preferred_plots` (list[dict], optional): 期望图清单（类型、轴变量、对比维度、目标受众）
+  - `comparison_baseline` (path 或 dict, optional): 实验值 / 文献值 / 上一轮仿真，用于 C/E 比较
+  - `uncertainty_handling` (enum, optional, default `propagate`): `propagate` | `report_only` | `ignore`
+  - `delivery_format` (enum, optional, default `markdown_report+png`): `markdown_report+png` | `notebook` | `csv_only` | `latex_table`
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 Stage E (Delivery Package) 输出交付清单，必须包含 `**Status**` 字段（`COMPLETED` / `PARTIAL` / `BLOCKED`）、关键 metrics 表（含不确定度）、图清单与路径、Stage B.5 plausibility-check 结果摘要、Stage D Pre-Delivery Audit 表格、以及 reproducibility 注脚（脚本/版本/数据指纹）。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### Explore (OpenCode built-in)
+  **When to delegate**: Quick read-only codebase search, file discovery, or dependency tracing.
+  **Required prompt fields**: N/A — Explore is a built-in subagent with no project-local agent contract file.
+  Expected return shape: File paths, search results, or code snippets relevant to the query.
+  
+  ### Critical Thinking
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/critical-thinking.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/critical-thinking.md` → `### Final Report 强制格式`.
+  
+  ### Diagram Architect
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/diagram-architect.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/diagram-architect.md` → `### Final Report 强制格式`.
+  
+  ### Scnet HPC Coordinator
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/scnet-hpc-coordinator.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/scnet-hpc-coordinator.md` → `### Final Report 强制格式`.
+  
+  ### Academic Writer
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/academic-writer.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/academic-writer.md` → `### Final Report 强制格式`.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 Stage E (Delivery Package) 输出交付清单，必须包含 `**Status**` 字段（`COMPLETED` / `PARTIAL` / `BLOCKED`）、关键 metrics 表（含不确定度）、图清单与路径、Stage B.5 plausibility-check 结果摘要、Stage D Pre-Delivery Audit 表格、以及 reproducibility 注脚（脚本/版本/数据指纹）。
+  
+delegates:
+  - {id: explore, name: Explore}
+  - {id: critical-thinking, name: Critical Thinking}
+  - {id: diagram-architect, name: Diagram Architect}
+  - {id: scnet-hpc-coordinator, name: Scnet HPC Coordinator}
+handoffs:
+  - {id: academic-writer, label: Write up analysis results, name: Academic Writer, prompt: 'Incorporate the analysis figures, tables, and key findings from this session into the manuscript.'}
+delivery_tier: specialist
+revision: 11
+argument_hint: Provide simulation output paths (OpenMC/MCNP6/FISPACT-II/DAGMC/natf/tricys), key metrics (e.g., TBR/DPA/dose/SDR), and preferred plots

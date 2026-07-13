@@ -1,0 +1,21 @@
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  
+  - `agent_output_text` (required): The full agent output containing numerical claims to verify
+  - `context` (optional): Task domain (e.g., "fusion neutronics" | "activation analysis" | "shielding") — helps narrow plausibility range lookup
+  
+  ### Final Report 强制格式
+  
+  report_format_version: 1
+  
+  **Status**: PASS (all values within physical ranges) | WARN (anomalies found but within literature bands) | FAIL (values violate physical ranges)
+  输出内嵌包含 per-value PASS/FAIL 标记和异常值详解。
+delivery_tier: producer-internal
+revision: 2
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  N/A — this agent is a leaf checker (calls scripts/benchmark_physical_quantities.py, no sub-agent delegation).
+return_envelope: v1

@@ -1,0 +1,46 @@
+# Metadata for validation scripts — NOT consumed by OpenCode runtime
+inbound_contract_text: |
+  ## 委派合同 — Mandatory Structured Report
+  
+  ### 调用方需提供
+  - `intent` (str, required): 沟通目的 slug，例如 `leader-progress-report` / `wechat-quick-ask` / `editor-email`。
+  - `recipient` (str, required): 收件人姓名、别名或明确邮箱地址；歧义时必须暂停询问。
+  - `channel` (enum, required): `email` | `wechat` | `feishu` | `wework` | `letter`。
+  - `language` (enum, required): `zh` | `en`。
+  - `tone` (enum, optional): `formal` | `semi-formal` | `casual` | `internal`；缺省时由 recipient relationship 推断并在 metadata 说明。
+  - `context` (str, required): 要传达的事实、请求、附件说明或用户提供的原文素材。
+  - `create_thunderbird_draft` (bool, optional, default `false`): 仅当用户显式要求保存为 Thunderbird 草稿时设为 `true`；不得触发发送。
+  - `attachments` (list[str], optional): 仅用于 Thunderbird 草稿附件路径；路径缺失或不明确时暂停询问。
+  
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Final Report Format` 输出，首行必须包含 `**Status**`（`DRAFTED` / `PARTIAL` / `FAILED`）。当 `create_thunderbird_draft=true` 时，Final Report 还必须列出 `thunderbird_draft_path` 或明确说明未创建原因。Status 语义：`DRAFTED` = 文案完成且无阻断缺字段；`PARTIAL` = 文案可用但仍含 `[[MISSING:]]` 或收件人待确认；`FAILED` = 模板、PM 数据或草稿创建失败且无法安全降级。
+  
+outbound_schemas_text: |
+  ## Outbound Delegation Schemas
+  
+  > This section documents all sub-agent delegations. Field names must mirror the callee's `### 调用方需提供` section.
+  
+  ### PM Coordinator
+  **When to delegate**: See workflow body for trigger conditions.
+  **Required prompt fields** (see `.opencode/agent/pm-coordinator.md` → `### 调用方需提供`):
+  - See callee inbound contract for current field list.
+  Expected return shape: See `.opencode/agent/pm-coordinator.md` → `### Final Report 强制格式`.
+  
+return_envelope_text: |
+  ### Final Report 强制格式
+  
+  
+  report_format_version: 1
+  
+  **Status**: COMPLETED (see execution log for task-level details)
+  按上文 `## Final Report Format` 输出，首行必须包含 `**Status**`（`DRAFTED` / `PARTIAL` / `FAILED`）。当 `create_thunderbird_draft=true` 时，Final Report 还必须列出 `thunderbird_draft_path` 或明确说明未创建原因。Status 语义：`DRAFTED` = 文案完成且无阻断缺字段；`PARTIAL` = 文案可用但仍含 `[[MISSING:]]` 或收件人待确认；`FAILED` = 模板、PM 数据或草稿创建失败且无法安全降级。
+  
+delegates:
+  - {id: pm-coordinator, name: PM Coordinator}
+delivery_tier: specialist
+revision: 8
