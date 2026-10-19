@@ -1,3 +1,6 @@
+> **ARCHIVE — 2026-10-19（AGENT-PLATFORM 治理）**
+> 归档冻结（ARCHIVE）：能力已被 `copilot-agents` 的 agent fleet 取代，**只读保留**，不再修复或新增功能。
+
 # Fusion Agent Fleet 🚀
 
 A multi-agent architecture for autonomous fusion nuclear engineering research — comprising **46 specialized agents**, **42 MCP servers**, and **33 crystallized skill workflows**.
